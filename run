@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ "$1" = "release" ]
+then
+    cd bin/release/
+    ./cy_parser
+else
+    cd bin/debug/
+    ./cy_parser
+fi
