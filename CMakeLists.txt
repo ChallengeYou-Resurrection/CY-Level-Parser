@@ -11,6 +11,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(SOURCES
 	src/main.cpp
 	src/FileParser.cpp
+	src/Utilities.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
