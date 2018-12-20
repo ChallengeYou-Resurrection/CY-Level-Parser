@@ -26,7 +26,7 @@ CYLevel parseFile(const char* fileName) {
     level.creator   = getMetadataAttribute("creator", tokens[4], true);
 
     //Offset 7 to ignore metadata + floors and walls (special case objects)
-    std::for_each(tokens.cbegin() + 7, tokens.cend(), [level](const std::string& token) {
+    std::for_each(tokens.cbegin() + 7, tokens.cend(), [&level](const std::string& token) {
         //Find the name of this object
         auto nameEndIndex = indexOf(token, ':');
         std::string_view objectName (token.c_str(), *nameEndIndex);
@@ -67,6 +67,7 @@ CYLevel parseFile(const char* fileName) {
             object.properties   = properties.data();
             object.floor        = floor;
         }
+        level.objects.emplace(std::string(objectName.data()), std::move(objects));
     });
     
     return level;
