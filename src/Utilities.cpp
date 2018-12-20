@@ -15,7 +15,7 @@ std::string getFileContent(const char* fileName) {
     std::getline(inFile, fileContent);
     return fileContent;
 }
-
+/*
 std::vector<std::string> split(const std::string& string, char deliminator) {
     std::vector<std::string> tokens;
     std::string token = "";
@@ -28,7 +28,7 @@ std::vector<std::string> split(const std::string& string, char deliminator) {
     }
     tokens.push_back(std::move(token));
     return tokens;
-}
+}*/
 
 std::optional<size_t> indexOf(const std::string& string, char token) {
     for (size_t i = 0; i < string.length(); i++) {

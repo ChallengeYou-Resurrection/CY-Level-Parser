@@ -28,7 +28,20 @@ std::string getFileContent(const char* fileName);
  * @param deliminator Character to split the string at
  * @return std::vector<std::string> The tokens
  */
-std::vector<std::string> split(const std::string& string, char deliminator);
+template<typename Iterable>
+std::vector<std::string> split(const Iterable& string, char deliminator) {
+    std::vector<std::string> tokens;
+    std::string token = "";
+    for (auto c : string) {
+        if (c == deliminator) {
+            tokens.push_back(std::move(token));
+            continue;
+        }
+        token.push_back(c);
+    }
+    tokens.push_back(std::move(token));
+    return tokens;
+}
 
 
 /**
