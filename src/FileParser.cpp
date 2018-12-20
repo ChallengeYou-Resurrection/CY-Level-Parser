@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <stack>
 
 namespace {
     std::string getMetadataAttribute(
@@ -12,12 +13,10 @@ namespace {
             token.length() - name.length() - (isString ? 6 : 4));
     }
 }
+
 CYLevel parseFile(const char* fileName) {
     CYLevel level;
     auto tokens = split(getFileContent(fileName), '#');
-
-    std::cout << tokens.back() << std::endl;
-    return level;
 
     level.name      = getMetadataAttribute("name", tokens[1], true);
     level.numFloors = getMetadataAttribute("levels", tokens[2], false);
@@ -28,11 +27,27 @@ CYLevel parseFile(const char* fileName) {
     std::for_each(tokens.cbegin() + 7, tokens.cend(), [level](const std::string& token) {
         //Find the name of this object
         auto nameEndIndex = indexOf(token, ':');
-        //if (!nameEndIndex) return;
         std::string_view objectName (token.c_str(), *nameEndIndex);
         std::string_view data       (token.c_str() + *nameEndIndex + 2);
 
-        std::cout << objectName << " DATA~" << data << "~\n";
+        //Match the square brackets
+        std::vector<std::pair<std::size_t, std::size_t>> bracketSections;
+        std::stack<size_t> unmatchedIndices;
+        for (size_t i = 0; i < data.length(); i++) {
+            auto c = data[i];
+            if (c == '[') {
+                unmatchedIndices.push(i);
+            }
+            else if (c == ']') {
+                auto begin  = unmatchedIndices.top();
+                auto length = i - begin;
+                unmatchedIndices.pop();
+                bracketSections.emplace_back(begin, length);
+            }
+        }
+
+        //Begin the extraction of the data
+
     });
     
     return level;
