@@ -26,6 +26,7 @@ std::vector<std::string> split(const std::string& string, char deliminator) {
         }
         token.push_back(c);
     }
+    tokens.push_back(std::move(token));
     return tokens;
 }
 
