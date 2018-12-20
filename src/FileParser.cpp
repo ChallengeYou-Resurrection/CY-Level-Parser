@@ -11,14 +11,14 @@ namespace {
             token.length() - name.length() - (isString ? 6 : 4));
     }
 }
-CYObjectMap parseFile(const char* fileName) {
-    CYObjectMap objects;
+CYLevel parseFile(const char* fileName) {
+    CYLevel level;
     auto tokens = split(getFileContent(fileName), '#');
 
-    auto name       = getMetadataAttribute("name", tokens[1], true);
-    auto floors     = getMetadataAttribute("levels", tokens[2], false);
-    auto version    = getMetadataAttribute("version", tokens[3], false);
-    auto creator    = getMetadataAttribute("creator", tokens[4], true);
+    level.name      = getMetadataAttribute("name", tokens[1], true);
+    level.numFloors = getMetadataAttribute("levels", tokens[2], false);
+    level.version   = getMetadataAttribute("version", tokens[3], false);
+    level.creator   = getMetadataAttribute("creator", tokens[4], true);
     
-    return objects;
+    return level;
 }
