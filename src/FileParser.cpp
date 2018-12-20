@@ -2,6 +2,7 @@
 #include "Utilities.h"
 
 #include <iostream>
+#include <algorithm>
 
 namespace {
     std::string getMetadataAttribute(
@@ -19,6 +20,17 @@ CYLevel parseFile(const char* fileName) {
     level.numFloors = getMetadataAttribute("levels", tokens[2], false);
     level.version   = getMetadataAttribute("version", tokens[3], false);
     level.creator   = getMetadataAttribute("creator", tokens[4], true);
+
+    //Offset 7 to ignore metadata + floors and walls (special case objects)
+    std::for_each(tokens.cbegin() + 7, tokens.cend(), [level](const std::string& token) {
+        //Find the name of this object
+        auto nameEndIndex = indexOf(token, ':');
+        //if (!nameEndIndex) return;
+        std::string_view objectName (token.c_str(), *nameEndIndex);
+        std::string_view data       (token.c_str() + *nameEndIndex + 2);
+
+        std::cout << objectName << " DATA~" << data << "~\n";
+    });
     
     return level;
 }

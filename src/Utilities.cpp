@@ -28,3 +28,12 @@ std::vector<std::string> split(const std::string& string, char deliminator) {
     }
     return tokens;
 }
+
+std::optional<size_t> indexOf(const std::string& string, char token) {
+    for (size_t i = 0; i < string.length(); i++) {
+        if (string[i] == token) {
+            return i;
+        }
+    }
+    return {};
+}
