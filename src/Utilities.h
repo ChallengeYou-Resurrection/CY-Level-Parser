@@ -23,7 +23,8 @@ std::string getFileContent(const char* fileName);
 /**
  * @brief Splits a string at a deliminator into seperate tokens
  * 
+ * @param string The string to split
  * @param deliminator Character to split the string at
  * @return std::vector<std::string> The tokens
  */
-std::vector<std::string> split(char deliminator);
+std::vector<std::string> split(const std::string& string, char deliminator);
