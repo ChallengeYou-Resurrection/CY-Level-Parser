@@ -3,10 +3,11 @@
 
 #include <fstream>
 
-int main(int argc, char** argv) {
-    auto level = parseFile("The Mouse Returns.cy");
+int main() {
+    std::string name = "The Mouse Returns.cy";
+    auto level = parseFile(name.c_str());
 
-    std::ofstream outfile("out.cy");
+    std::ofstream outfile(name + ".out");
     outfile << "Name:    "  << level.name           << '\n' 
             << "Author:  "  << level.creator        << '\n' 
             << "Version: "  << level.version        << '\n'
@@ -17,6 +18,7 @@ int main(int argc, char** argv) {
             outfile << "\tPosition:   " << obj.position.x << " " << obj.position.z << '\n'
                     << "\tProperties: " << obj.properties << '\n'
                     << "\tFloor:      " << (int)obj.floor << "\n\n";
+            break;
         }
     }
 }

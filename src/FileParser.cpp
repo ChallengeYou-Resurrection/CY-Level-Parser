@@ -14,6 +14,8 @@ namespace {
     }
 }
 
+
+
 CYLevel parseFile(const char* fileName) {
     CYLevel level;
     auto content = getFileContent(fileName);
@@ -25,14 +27,14 @@ CYLevel parseFile(const char* fileName) {
     level.version   = getMetadataAttribute("version", tokens[3], false);
     level.creator   = getMetadataAttribute("creator", tokens[4], true);
 
-    //Offset 7 to ignore metadata + floors and walls (special case objects)
-    std::for_each(tokens.cbegin() + 7, tokens.cend(), [&level](const std::string& token) {
+
+    std::for_each(tokens.cbegin() + 5, tokens.cend(), [&level](const std::string& token) {
         //Find the name of this object
         auto nameEndIndex = indexOf(token, ':');
         auto objectName = token.substr(0, *nameEndIndex);
         auto data       = token.substr(*nameEndIndex + 2);
 
-        //Match the square brackets
+        //Match the square brackets [ .. ]
         std::vector<std::pair<std::size_t, std::size_t>> sections;
         std::stack<size_t> unmatchedIndices;
         for (size_t i = 0; i < data.length(); i++) {
@@ -47,28 +49,39 @@ CYLevel parseFile(const char* fileName) {
                 sections.emplace_back(begin + 1, length - 1);
             }
         }
+        
 
-        //Extraction of the data
-        const auto& s = sections;
-        const auto& d = data;      
-        std::vector<CYObject> objects; 
-        for (size_t i = 0; i < s.size() - 1; i += 3) {
-            CYObject object;
-            std::string_view position   (d.data() + s[i].first, s[i].second);
-            std::string_view fullData   (d.data() + s[i + 2].first, s[i + 2].second);
-            auto properties = d.substr( s[i + 1].first, s[i + 1].second);
-
-            auto pos = split(position, ',');
-            auto x = std::stoi(pos[0]);
-            auto y = std::stoi(pos[1]);
-            auto floor = std::stoi(split(fullData, ',').back());
-
-            object.position     = {x, y};
-            object.properties   = properties.data();
-            object.floor        = floor;
-            objects.push_back(object);
+        //Walls and floors have a special format, everything else follows the same format
+        //[[x, y], [properties], floor]
+        if (objectName == "Floor") {
+            
         }
-        level.objects.emplace(std::string(objectName.data()), std::move(objects));
+        else if (objectName == "walls") {
+
+        }
+        else {
+            //Extraction of the data
+            const auto& s = sections;
+            const auto& d = data;      
+            std::vector<CYObject> objects; 
+            for (size_t i = 0; i < s.size() - 1; i += 3) {
+                CYObject object;
+                std::string_view position   (d.data() + s[i].first, s[i].second);
+                std::string_view fullData   (d.data() + s[i + 2].first, s[i + 2].second);
+                auto properties = d.substr( s[i + 1].first, s[i + 1].second);
+
+                auto pos = split(position, ',');
+                auto x = std::stoi(pos[0]);
+                auto y = std::stoi(pos[1]);
+                auto floor = std::stoi(split(fullData, ',').back());
+
+                object.position     = {x, y};
+                object.properties   = properties.data();
+                object.floor        = floor;
+                objects.push_back(object);
+            }
+            level.objects.emplace(std::string(objectName.data()), std::move(objects));
+        }
     });
     
     return level;
