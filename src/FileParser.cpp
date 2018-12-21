@@ -67,7 +67,9 @@ CYLevel parseFile(const char* fileName) {
             }
         }
         
-
+        // = = = = = = = = = = = = = =
+        // = Data extraction section =
+        // = = = = = = = = = = = = = =
         //Walls and floors have a special format, everything else follows the same format
         //[[x, y], [properties], floor]
         const auto& s = sections;
@@ -76,39 +78,46 @@ CYLevel parseFile(const char* fileName) {
             std::vector<CYFloor> floors;
 
             for (size_t i = 0; i < s.size() - 1; i += 8) {
-                auto vertexA = getMatchSection(s[i    ], d);
-                auto vertexB = getMatchSection(s[i + 1], d);
-                auto vertexC = getMatchSection(s[i + 2], d);
-                auto vertexD = getMatchSection(s[i + 3], d);
-                auto properties = d.substr(s[i + 6].first, s[i + 6].second);
-
                 CYFloor floor;
-                floor.vertexA = extractPosition(vertexA);
-                floor.vertexB = extractPosition(vertexB);
-                floor.vertexC = extractPosition(vertexC);
-                floor.vertexD = extractPosition(vertexD);
-                floor.properties = properties;
+                floor.vertexA = extractPosition(getMatchSection(s[i    ], d));
+                floor.vertexB = extractPosition(getMatchSection(s[i + 1], d));
+                floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
+                floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
+                floor.properties = d.substr(s[i + 6].first, s[i + 6].second);
                 floor.floor = i % 8;
                 floors.push_back(floor);
             }
             level.floors = std::move(floors);
         }
         else if (objectName == "walls") {
-            for (size_t i = 0; i < s.size(); i++) {
-                //std::cout << i << ": ~" << d.substr(s[i].first, s[i].second) << "~\n";
+            std::vector<CYWall> walls;
+            for (size_t i = 0; i < s.size() - 1; i += 2) {
+                auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
+                auto properties = getMatchSection(s[i], d);
+
+                int xOffset = std::stoi(tokens[0]);
+                int zOffset = std::stoi(tokens[1]);
+
+                int xBegin  = std::stoi(tokens[2]);
+                int zBegin  = std::stoi(tokens[3]);
+
+                CYWall wall;
+                wall.beginPoint = {xBegin,              zBegin};
+                wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
+                wall.properties = properties;
+                wall.floor      = std::stoi(tokens.back());
+                walls.push_back(wall);
             }
+            level.walls = std::move(walls);
         }
-        else {
-            //Extraction of the data     
+        else {    
             std::vector<CYObject> objects; 
             for (size_t i = 0; i < s.size() - 1; i += 3) {
-                auto position = getMatchSection(s[i],     d);
                 auto fullData = getMatchSection(s[i + 2], d);
-                auto properties = d.substr( s[i + 1].first, s[i + 1].second);
 
                 CYObject object;
-                object.position     = extractPosition(position);
-                object.properties   = properties.data();
+                object.position     = extractPosition(getMatchSection(s[i], d));
+                object.properties   = d.substr( s[i + 1].first, s[i + 1].second);
                 object.floor        = std::stoi(split(fullData, ',').back());
                 objects.push_back(object);
             }

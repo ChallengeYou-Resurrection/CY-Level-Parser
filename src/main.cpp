@@ -22,6 +22,14 @@ int main() {
                 << "\tProperties: " << floor.properties << '\n'
                 << "\tFloors:     " << (int)floor.floor << "\n\n";
     }
+
+    outfile << "Walls\n";
+    for (const auto& wall : level.walls) {
+        outfile << "\tBegin:      " << wall.beginPoint.x    << " " << wall.beginPoint.z << '\n'
+                << "\tEnd:        " << wall.endPoint.x      << " " << wall.endPoint.z   << '\n'
+                << "\tProperties: " << wall.properties      << '\n'
+                << "\tFloor:      " << (int)wall.floor      << "\n\n";
+    }
     
     for (const auto& cyObject : level.objects) {
         outfile << cyObject.first << '\n';
