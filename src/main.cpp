@@ -41,14 +41,27 @@ void writeLevel(const std::string& name, const CYLevel& level) {
     }
 }
 
+CYLevel readFile(const std::string& name) {
+    std::cout << "Trying: " << name << '\n';
+    return parseFile(name.c_str());
+}
+
+void testLocal(const std::string& name) {
+    std::string path = "../../Games/" + name;
+    auto level = readFile(path);
+    writeLevel(name, level);
+}
+
 int main() {
+
+    testLocal("51704.Lost City.mjcmarcus10.cy");
+    return 0;
 
     auto itr = fs::directory_iterator("../../Games");
     for (const auto& path : itr) {
         try {
             const std::string name = path.path().filename().string();
-            std::cout << "Trying: " << name << '\n';
-            auto level = parseFile(path.path().c_str());
+            auto level = readFile(path.path().c_str());
             writeLevel(name, level);
             std::cout << "Sucess\n\n";
         }
