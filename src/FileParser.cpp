@@ -88,22 +88,27 @@ CYLevel parseFile(const char* fileName) {
             level.floors = std::move(floors);
         }
         else if (objectName == "walls") {
+            std::vector<CYWall> walls;
             for (size_t i = 0; i < s.size() - 1; i += 2) {
                 auto tokens = split(d.substr(s[i + 1].first, s[i + 2].second), ',');
                 auto properties = getMatchSection(s[i], d);
+
+                CYWall wall;
+
+                //...
+                walls.push_back(wall);
             }
+            level.walls = std::move(walls);
         }
         else {
             //Extraction of the data     
             std::vector<CYObject> objects; 
             for (size_t i = 0; i < s.size() - 1; i += 3) {
-                auto position = getMatchSection(s[i],     d);
                 auto fullData = getMatchSection(s[i + 2], d);
-                auto properties = d.substr( s[i + 1].first, s[i + 1].second);
 
                 CYObject object;
-                object.position     = extractPosition(position);
-                object.properties   = properties.data();
+                object.position     = extractPosition(getMatchSection(s[i], d));
+                object.properties   = d.substr( s[i + 1].first, s[i + 1].second);
                 object.floor        = std::stoi(split(fullData, ',').back());
                 objects.push_back(object);
             }
