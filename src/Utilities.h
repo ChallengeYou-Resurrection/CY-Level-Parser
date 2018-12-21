@@ -60,10 +60,10 @@ std::vector<std::string> split(const Iterable& string, char deliminator) {
  * @param source The std::vector<T> to move the data from
  */
 template<typename T>
-void concatenateMoveVector(std::vector<T>& destination, std::vector<T>& source) {
+void concatenateMoveVector(std::vector<T>& destination, std::vector<T>& source, size_t offset = 0) {
     destination.insert(
         destination.end(),
-        std::make_move_iterator(source.begin()),
+        std::make_move_iterator(source.begin() + offset),
         std::make_move_iterator(source.end())
     );
 }

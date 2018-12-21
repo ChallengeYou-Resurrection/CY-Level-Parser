@@ -31,31 +31,37 @@ namespace {
     }
 }
 
-
-
 CYLevel parseFile(const char* fileName) {
     CYLevel level;
     auto content = getFileContent(fileName);
     content.pop_back();
-    auto tokens = split(content, '#');
+
+    auto left = content.find("#Board:");
+    auto right = content.find("#Monster:");
+
+    auto leftTokens     = split(content.substr(0, left), '#');
+    auto rightTokens    = split(content.substr(right), '#');
+    auto centerToken    = content.substr(left + 1, right - left - 1);
+
+    std::vector<std::string> tokens;
+    tokens.reserve(leftTokens.size() + rightTokens.size() + centerToken.size() + 16);
+
+    concatenateMoveVector(tokens, leftTokens);
+    tokens.push_back(centerToken);
+    concatenateMoveVector(tokens, rightTokens, 1);
 
     level.name      = getMetadataAttribute("name", tokens[1], true);
     level.numFloors = getMetadataAttribute("levels", tokens[2], false);
     level.version   = getMetadataAttribute("version", tokens[3], false);
     level.creator   = getMetadataAttribute("creator", tokens[4], true);
 
-
-    float version = stof(level.version);
-    if (version < 3.6) {
-        return level;
-    }
-
-    std::cout << "Begin\n";
     std::for_each(tokens.cbegin() + 5, tokens.cend(), [&level](const std::string& token) {
         //Find the name of this object
         auto nameEndIndex = indexOf(token, ':');
         auto objectName = token.substr(0, *nameEndIndex);
         auto data       = token.substr(*nameEndIndex + 2);
+
+        std::cout << "Parsing: " << objectName << std::endl;
 
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
