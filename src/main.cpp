@@ -2,12 +2,12 @@
 #include "Benchmark.h"
 
 #include <fstream>
+#include <filesystem>
 
-int main() {
-    std::string name = "The Mouse Returns.cy";
-    auto level = parseFile(name.c_str());
+namespace fs = std::filesystem;
 
-    std::ofstream outfile(name + ".out");
+void writeLevel(const std::string& name, const CYLevel& level) {
+    std::ofstream outfile("../../out/" + name + ".out");
     outfile << "Name:    "  << level.name           << '\n' 
             << "Author:  "  << level.creator        << '\n' 
             << "Version: "  << level.version        << '\n'
@@ -39,4 +39,22 @@ int main() {
                     << "\tFloor:      " << (int)obj.floor << "\n\n";
         }
     }
+}
+
+int main() {
+
+    auto itr = fs::directory_iterator("../../Games");
+    for (const auto& path : itr) {
+        try {
+            const std::string name = path.path().filename().string();
+            std::cout << "Trying: " << name << '\n';
+            auto level = parseFile(path.path().c_str());
+            writeLevel(name, level);
+            std::cout << "Sucess\n\n";
+        }
+        catch (std::exception& e) {
+            std::cout << "Cannot parse: " << path.path().string() << '\n';
+        }
+    }
+    return 0;
 }

@@ -45,6 +45,12 @@ CYLevel parseFile(const char* fileName) {
     level.creator   = getMetadataAttribute("creator", tokens[4], true);
 
 
+    float version = stof(level.version);
+    if (version < 3.6) {
+        return level;
+    }
+
+    std::cout << "Begin\n";
     std::for_each(tokens.cbegin() + 5, tokens.cend(), [&level](const std::string& token) {
         //Find the name of this object
         auto nameEndIndex = indexOf(token, ':');
