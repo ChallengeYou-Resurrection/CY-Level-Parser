@@ -12,7 +12,16 @@ namespace {
             name.length() + (isString ? 3 : 2),
             token.length() - name.length() - (isString ? 6 : 4));
     }
+
+    Position extractPosition(const std::string_view& v) {
+        auto pos = split(v, ',');
+        auto x = std::stoi(pos[0]);
+        auto z = std::stoi(pos[1]);
+        return {x, z};
+    }
 }
+
+
 
 CYLevel parseFile(const char* fileName) {
     CYLevel level;
@@ -25,14 +34,14 @@ CYLevel parseFile(const char* fileName) {
     level.version   = getMetadataAttribute("version", tokens[3], false);
     level.creator   = getMetadataAttribute("creator", tokens[4], true);
 
-    //Offset 7 to ignore metadata + floors and walls (special case objects)
-    std::for_each(tokens.cbegin() + 7, tokens.cend(), [&level](const std::string& token) {
+
+    std::for_each(tokens.cbegin() + 5, tokens.cend(), [&level](const std::string& token) {
         //Find the name of this object
         auto nameEndIndex = indexOf(token, ':');
         auto objectName = token.substr(0, *nameEndIndex);
         auto data       = token.substr(*nameEndIndex + 2);
 
-        //Match the square brackets
+        //Match the square brackets [ .. ]
         std::vector<std::pair<std::size_t, std::size_t>> sections;
         std::stack<size_t> unmatchedIndices;
         for (size_t i = 0; i < data.length(); i++) {
@@ -47,28 +56,54 @@ CYLevel parseFile(const char* fileName) {
                 sections.emplace_back(begin + 1, length - 1);
             }
         }
+        
 
-        //Extraction of the data
+        //Walls and floors have a special format, everything else follows the same format
+        //[[x, y], [properties], floor]
         const auto& s = sections;
-        const auto& d = data;      
-        std::vector<CYObject> objects; 
-        for (size_t i = 0; i < s.size() - 1; i += 3) {
-            CYObject object;
-            std::string_view position   (d.data() + s[i].first, s[i].second);
-            std::string_view fullData   (d.data() + s[i + 2].first, s[i + 2].second);
-            auto properties = d.substr( s[i + 1].first, s[i + 1].second);
+        const auto& d = data;    
+        if (objectName == "Floor") {
+            std::vector<CYFloor> floors;
 
-            auto pos = split(position, ',');
-            auto x = std::stoi(pos[0]);
-            auto y = std::stoi(pos[1]);
-            auto floor = std::stoi(split(fullData, ',').back());
+            for (size_t i = 0; i < s.size() - 1; i += 8) {
+                std::string_view vertexA (d.data() + s[i].first, s[i].second);
+                std::string_view vertexB (d.data() + s[i + 1].first, s[i + 1].second);
+                std::string_view vertexC (d.data() + s[i + 2].first, s[i + 2].second);
+                std::string_view vertexD (d.data() + s[i + 3].first, s[i + 3].second);
+                auto properties = d.substr(s[i + 6].first, s[i + 6].second);
 
-            object.position     = {x, y};
-            object.properties   = properties.data();
-            object.floor        = floor;
-            objects.push_back(object);
+                CYFloor floor;
+                floor.vertexA = extractPosition(vertexA);
+                floor.vertexB = extractPosition(vertexB);
+                floor.vertexC = extractPosition(vertexC);
+                floor.vertexD = extractPosition(vertexD);
+                floor.properties = properties;
+                floor.floor = i % 8;
+                floors.push_back(floor);
+            }
+            level.floors = std::move(floors);
         }
-        level.objects.emplace(std::string(objectName.data()), std::move(objects));
+        else if (objectName == "walls") {
+            for (size_t i = 0; i < s.size(); i++) {
+                //std::cout << i << ": ~" << d.substr(s[i].first, s[i].second) << "~\n";
+            }
+        }
+        else {
+            //Extraction of the data     
+            std::vector<CYObject> objects; 
+            for (size_t i = 0; i < s.size() - 1; i += 3) {
+                CYObject object;
+                std::string_view position   (d.data() + s[i].first, s[i].second);
+                std::string_view fullData   (d.data() + s[i + 2].first, s[i + 2].second);
+                auto properties = d.substr( s[i + 1].first, s[i + 1].second);
+
+                object.position     = extractPosition(position);
+                object.properties   = properties.data();
+                object.floor        = std::stoi(split(fullData, ',').back());
+                objects.push_back(object);
+            }
+            level.objects.emplace(std::string(objectName.data()), std::move(objects));
+        }
     });
     
     return level;

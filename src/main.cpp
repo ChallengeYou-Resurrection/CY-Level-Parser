@@ -3,14 +3,26 @@
 
 #include <fstream>
 
-int main(int argc, char** argv) {
-    auto level = parseFile("The Mouse Returns.cy");
+int main() {
+    std::string name = "The Mouse Returns.cy";
+    auto level = parseFile(name.c_str());
 
-    std::ofstream outfile("out.cy");
+    std::ofstream outfile(name + ".out");
     outfile << "Name:    "  << level.name           << '\n' 
             << "Author:  "  << level.creator        << '\n' 
             << "Version: "  << level.version        << '\n'
             << "Floors:  "  << level.numFloors      << '\n';
+
+    outfile << "Floors\n";
+    for (const auto& floor : level.floors) {
+        outfile << "\tVertex 1:   " << floor.vertexA.x << " " << floor.vertexA.z << '\n'
+                << "\tVertex 2:   " << floor.vertexB.x << " " << floor.vertexB.z << '\n'
+                << "\tVertex 3:   " << floor.vertexC.x << " " << floor.vertexC.z << '\n'
+                << "\tVertex 4:   " << floor.vertexD.x << " " << floor.vertexD.z << '\n'
+                << "\tProperties: " << floor.properties << '\n'
+                << "\tFloors:     " << (int)floor.floor << "\n\n";
+    }
+    
     for (const auto& cyObject : level.objects) {
         outfile << cyObject.first << '\n';
         for (const auto& obj : cyObject.second) {
