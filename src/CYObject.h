@@ -32,6 +32,13 @@ struct CYFloor {
     uint8_t floor;
 };
 
+struct CYWall {
+    Position a;
+    Position b;
+    std::string properties;
+    uint8_t floor;
+};
+
 using CYObjectMap = std::unordered_map<std::string, std::vector<CYObject>>;
 struct CYLevel {
     std::string name;
