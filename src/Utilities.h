@@ -22,6 +22,15 @@ size_t getFileLength(const char* fileName);
 std::string getFileContent(const char* fileName);
 
 /**
+ * @brief Gets the position of the first instance of 'token' in 'string'
+ *
+ * @param string The string to search for the 'token' in
+ * @param token The token to find the index of
+ * @return std::optional<size_t> The position of the token 
+ */
+std::optional<size_t> indexOf(const std::string& string, char token);
+
+/**
  * @brief Splits a string at a deliminator into seperate tokens
  * 
  * @param string The string to split
@@ -43,12 +52,19 @@ std::vector<std::string> split(const Iterable& string, char deliminator) {
     return tokens;
 }
 
-
 /**
- * @brief Gets the position of the first instance of 'token' in 'string'
- *
- * @param string The string to search for the 'token' in
- * @param token The token to find the index of
- * @return std::optional<size_t> The position of the token 
+ * @brief Concatenate two vectors by performing a move operation on a source vector
+ * 
+ * @tparam T The type both vectors hold
+ * @param destination The std::vector<T> to move the data to
+ * @param source The std::vector<T> to move the data from
  */
-std::optional<size_t> indexOf(const std::string& string, char token);
+template<typename T>
+void concatenateMoveVector(std::vector<T>& destination, std::vector<T>& source) {
+    destination.insert(
+        destination.end(),
+        std::make_move_iterator(source.begin()),
+        std::make_move_iterator(source.end())
+    );
+}
+
