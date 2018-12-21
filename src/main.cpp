@@ -12,13 +12,23 @@ int main() {
             << "Author:  "  << level.creator        << '\n' 
             << "Version: "  << level.version        << '\n'
             << "Floors:  "  << level.numFloors      << '\n';
+
+    outfile << "Floors\n";
+    for (const auto& floor : level.floors) {
+        outfile << "\tVertex 1:   " << floor.vertexA.x << " " << floor.vertexA.z << '\n'
+                << "\tVertex 2:   " << floor.vertexB.x << " " << floor.vertexB.z << '\n'
+                << "\tVertex 3:   " << floor.vertexC.x << " " << floor.vertexC.z << '\n'
+                << "\tVertex 4:   " << floor.vertexD.x << " " << floor.vertexD.z << '\n'
+                << "\tProperties: " << floor.properties << '\n'
+                << "\tFloors:     " << (int)floor.floor << "\n\n";
+    }
+    
     for (const auto& cyObject : level.objects) {
         outfile << cyObject.first << '\n';
         for (const auto& obj : cyObject.second) {
             outfile << "\tPosition:   " << obj.position.x << " " << obj.position.z << '\n'
                     << "\tProperties: " << obj.properties << '\n'
                     << "\tFloor:      " << (int)obj.floor << "\n\n";
-            break;
         }
     }
 }
