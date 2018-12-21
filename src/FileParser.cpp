@@ -36,6 +36,8 @@ CYLevel parseFile(const char* fileName) {
     auto content = getFileContent(fileName);
     content.pop_back();
 
+    //Find the index of the #Board objects, because some message might contain a #, which would 
+    //cause the call to the split(...) function to split at the wrong parts
     auto left = content.find("#Board:");
     auto right = content.find("#Monster:");
 
@@ -50,6 +52,7 @@ CYLevel parseFile(const char* fileName) {
     tokens.push_back(centerToken);
     concatenateMoveVector(tokens, rightTokens, 1);
 
+    //Extract metadata from the file
     level.name      = getMetadataAttribute("name", tokens[1], true);
     level.numFloors = getMetadataAttribute("levels", tokens[2], false);
     level.version   = getMetadataAttribute("version", tokens[3], false);
