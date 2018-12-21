@@ -5,6 +5,12 @@
 #include <algorithm>
 #include <stack>
 
+/**
+ * @brief This pair defines a pair of matching square brackets
+ * 
+ */
+using BracketMatch = std::pair<std::size_t, std::size_t>;
+
 namespace {
     std::string getMetadataAttribute(
         const std::string& name, const std::string& token, bool isString) {
@@ -18,6 +24,10 @@ namespace {
         auto x = std::stoi(pos[0]);
         auto z = std::stoi(pos[1]);
         return {x, z};
+    }
+
+    std::string_view getMatchSection(const BracketMatch& match, const std::string& data) {
+        return std::string_view(data.data() + match.first, match.second);
     }
 }
 
@@ -42,7 +52,7 @@ CYLevel parseFile(const char* fileName) {
         auto data       = token.substr(*nameEndIndex + 2);
 
         //Match the square brackets [ .. ]
-        std::vector<std::pair<std::size_t, std::size_t>> sections;
+        std::vector<BracketMatch> sections;
         std::stack<size_t> unmatchedIndices;
         for (size_t i = 0; i < data.length(); i++) {
             auto c = data[i];
@@ -66,10 +76,10 @@ CYLevel parseFile(const char* fileName) {
             std::vector<CYFloor> floors;
 
             for (size_t i = 0; i < s.size() - 1; i += 8) {
-                std::string_view vertexA (d.data() + s[i].first, s[i].second);
-                std::string_view vertexB (d.data() + s[i + 1].first, s[i + 1].second);
-                std::string_view vertexC (d.data() + s[i + 2].first, s[i + 2].second);
-                std::string_view vertexD (d.data() + s[i + 3].first, s[i + 3].second);
+                auto vertexA = getMatchSection(s[i    ], d);
+                auto vertexB = getMatchSection(s[i + 1], d);
+                auto vertexC = getMatchSection(s[i + 2], d);
+                auto vertexD = getMatchSection(s[i + 3], d);
                 auto properties = d.substr(s[i + 6].first, s[i + 6].second);
 
                 CYFloor floor;
@@ -92,11 +102,11 @@ CYLevel parseFile(const char* fileName) {
             //Extraction of the data     
             std::vector<CYObject> objects; 
             for (size_t i = 0; i < s.size() - 1; i += 3) {
-                CYObject object;
-                std::string_view position   (d.data() + s[i].first, s[i].second);
-                std::string_view fullData   (d.data() + s[i + 2].first, s[i + 2].second);
+                auto position = getMatchSection(s[i],     d);
+                auto fullData = getMatchSection(s[i + 2], d);
                 auto properties = d.substr( s[i + 1].first, s[i + 1].second);
 
+                CYObject object;
                 object.position     = extractPosition(position);
                 object.properties   = properties.data();
                 object.floor        = std::stoi(split(fullData, ',').back());
