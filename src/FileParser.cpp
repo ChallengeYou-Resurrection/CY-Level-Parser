@@ -67,7 +67,9 @@ CYLevel parseFile(const char* fileName) {
             }
         }
         
-
+        // = = = = = = = = = = = = = =
+        // = Data extraction section =
+        // = = = = = = = = = = = = = =
         //Walls and floors have a special format, everything else follows the same format
         //[[x, y], [properties], floor]
         const auto& s = sections;
@@ -90,18 +92,25 @@ CYLevel parseFile(const char* fileName) {
         else if (objectName == "walls") {
             std::vector<CYWall> walls;
             for (size_t i = 0; i < s.size() - 1; i += 2) {
-                auto tokens = split(d.substr(s[i + 1].first, s[i + 2].second), ',');
+                auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
                 auto properties = getMatchSection(s[i], d);
 
-                CYWall wall;
+                int xOffset = std::stoi(tokens[0]);
+                int zOffset = std::stoi(tokens[1]);
 
-                //...
+                int xBegin  = std::stoi(tokens[2]);
+                int zBegin  = std::stoi(tokens[3]);
+
+                CYWall wall;
+                wall.beginPoint = {xBegin,              zBegin};
+                wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
+                wall.properties = properties;
+                wall.floor      = std::stoi(tokens.back());
                 walls.push_back(wall);
             }
             level.walls = std::move(walls);
         }
-        else {
-            //Extraction of the data     
+        else {    
             std::vector<CYObject> objects; 
             for (size_t i = 0; i < s.size() - 1; i += 3) {
                 auto fullData = getMatchSection(s[i + 2], d);

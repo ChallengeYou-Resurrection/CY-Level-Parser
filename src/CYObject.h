@@ -33,8 +33,8 @@ struct CYFloor {
 };
 
 struct CYWall {
-    Position a;
-    Position b;
+    Position beginPoint;
+    Position endPoint;
     std::string properties;
     uint8_t floor;
 };
