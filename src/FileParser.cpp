@@ -76,26 +76,21 @@ CYLevel parseFile(const char* fileName) {
             std::vector<CYFloor> floors;
 
             for (size_t i = 0; i < s.size() - 1; i += 8) {
-                auto vertexA = getMatchSection(s[i    ], d);
-                auto vertexB = getMatchSection(s[i + 1], d);
-                auto vertexC = getMatchSection(s[i + 2], d);
-                auto vertexD = getMatchSection(s[i + 3], d);
-                auto properties = d.substr(s[i + 6].first, s[i + 6].second);
-
                 CYFloor floor;
-                floor.vertexA = extractPosition(vertexA);
-                floor.vertexB = extractPosition(vertexB);
-                floor.vertexC = extractPosition(vertexC);
-                floor.vertexD = extractPosition(vertexD);
-                floor.properties = properties;
+                floor.vertexA = extractPosition(getMatchSection(s[i    ], d));
+                floor.vertexB = extractPosition(getMatchSection(s[i + 1], d));
+                floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
+                floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
+                floor.properties = d.substr(s[i + 6].first, s[i + 6].second);
                 floor.floor = i % 8;
                 floors.push_back(floor);
             }
             level.floors = std::move(floors);
         }
         else if (objectName == "walls") {
-            for (size_t i = 0; i < s.size(); i++) {
-                //std::cout << i << ": ~" << d.substr(s[i].first, s[i].second) << "~\n";
+            for (size_t i = 0; i < s.size() - 1; i += 2) {
+                auto tokens = split(d.substr(s[i + 1].first, s[i + 2].second), ',');
+                auto properties = getMatchSection(s[i], d);
             }
         }
         else {

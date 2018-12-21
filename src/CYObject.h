@@ -45,6 +45,8 @@ struct CYLevel {
     std::string creator;
     std::string version;
     std::string numFloors;
+
     CYObjectMap objects;
     std::vector<CYFloor> floors;
+    std::vector<CYWall> walls;
 };
