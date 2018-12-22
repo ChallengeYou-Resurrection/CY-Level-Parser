@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <map>
 #include <vector>
 
 /**
@@ -39,7 +40,8 @@ struct CYWall {
     uint8_t floor;
 };
 
-using CYObjectMap = std::unordered_map<std::string, std::vector<CYObject>>;
+//@TODO Change back to 
+using CYObjectMap = std::map<std::string, std::vector<CYObject>>;
 struct CYLevel {
     std::string name;
     std::string creator;

@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <stack>
 
+
+
 /**
  * @brief This pair defines a pair of matching square brackets
  * 
@@ -12,6 +14,16 @@
 using BracketMatch = std::pair<std::size_t, std::size_t>;
 
 namespace {
+    struct Error {
+        Error(std::string name, std::string error)
+        :   name    (name)
+        ,   reason  (error) 
+        {}
+
+        std::string name;
+        std::string reason;
+    };
+
     std::string getMetadataAttribute(
         const std::string& name, const std::string& token, bool isString) {
         return token.substr(
@@ -32,15 +44,6 @@ namespace {
     }
 }
 
-struct Error {
-    Error(std::string name, std::string error)
-    :   name    (name)
-    ,   reason  (error) 
-    {}
-
-    std::string name;
-    std::string reason;
-};
 std::vector<Error> errors;
 
 std::optional<CYLevel> parseFile(const char* fileName) {
@@ -94,12 +97,8 @@ std::optional<CYLevel> parseFile(const char* fileName) {
             auto length = i - begin;
             unmatchedIndices.pop();
             if (unmatchedIndices.empty()) {
-                name.erase(
-                    std::remove_if(name.begin(), name.end(), [](char c) {
-                        return c == ',' || c =='#' || c == ':' || c == '[' || c == '\"' ||std::isspace(c);
-                    }),
-                    name.end());
-                    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+                removeFrom(name, {',', '#', ':', '[', '\"', ' '});
+                std::transform(name.begin(), name.end(), name.begin(), ::tolower);
                 tokens.emplace_back(std::move(name), objects.substr(begin, length + 1));
             }
         }

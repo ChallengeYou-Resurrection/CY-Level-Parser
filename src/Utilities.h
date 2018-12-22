@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <algorithm>
 
 /**
  * @brief Get the length of a file, useful for optimization purposes for allocating
@@ -80,5 +81,28 @@ void concatenateMoveVector(std::vector<T>& destination, std::vector<T>& source, 
         std::make_move_iterator(source.begin() + offset),
         std::make_move_iterator(source.end())
     );
+}
+
+/**
+ * @brief Removes multiple items from an iterable object
+ * 
+ * @tparam Iterable Type of the object to remove items from
+ * @tparam T Type of the object type to remove
+ * @param iterable The list of items to remove items from
+ * @param toRemove Items to remove from the list
+ */
+template<typename Iterable, typename T>
+void removeFrom(Iterable& iterable, const std::initializer_list<T>& toRemove) {
+    iterable.erase(
+        std::remove_if(iterable.begin(), iterable.end(), 
+        [&toRemove](const T& item) {
+            for (const auto& i : toRemove) {
+                if (item == i) {
+                    return true;
+                }
+            }
+            return false;
+        }),
+        iterable.end());
 }
 
