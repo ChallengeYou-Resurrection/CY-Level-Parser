@@ -58,6 +58,7 @@ std::vector<std::string> split(const Iterable& string, char deliminator) {
  * @tparam T The type both vectors hold
  * @param destination The std::vector<T> to move the data to
  * @param source The std::vector<T> to move the data from
+ * @param offset The offset from the start of the source vector to begin concatenation from (optional)
  */
 template<typename T>
 void concatenateMoveVector(std::vector<T>& destination, std::vector<T>& source, size_t offset = 0) {
