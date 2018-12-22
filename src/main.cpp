@@ -41,7 +41,7 @@ void writeLevel(const std::string& name, const CYLevel& level) {
     }
 }
 
-CYLevel readFile(const std::string& name) {
+std::optional<CYLevel> readFile(const std::string& name) {
     std::cout << "Trying: " << name << '\n';
     return parseFile(name.c_str());
 }
@@ -49,24 +49,30 @@ CYLevel readFile(const std::string& name) {
 void testLocal(const std::string& name) {
     std::string path = "../../Games/" + name;
     auto level = readFile(path);
-    writeLevel(name, level);
+    if (level) {
+        std::cout << "Writing level!\n";
+        writeLevel(name, *level);
+    }   
 }
 
 int main() {
-
-    testLocal("67082.Hogwarts day 2.mconnel.cy");
+#ifdef DEBUG
+    testLocal("573.AIDAN..cy");
     return 0;
-
+#endif
     auto itr = fs::directory_iterator("../../Games");
     for (const auto& path : itr) {
         try {
             const std::string name = path.path().filename().string();
             auto level = readFile(path.path().c_str());
-            writeLevel(name, level);
-            std::cout << "Sucess\n\n";
+            if (level) {
+                writeLevel(name, *level);
+            }   
         }
         catch (std::exception& e) {
             std::cout << "Cannot parse: " << path.path().string() << '\n';
+            std::cout << e.what() << '\n';
+            return 0;
         }
     }
     return 0;

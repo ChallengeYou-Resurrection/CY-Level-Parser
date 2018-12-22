@@ -31,8 +31,7 @@ namespace {
     }
 }
 
-#define DEBUG
-CYLevel parseFile(const char* fileName) {
+std::optional<CYLevel> parseFile(const char* fileName) {
     CYLevel level;
     auto content = getFileContent(fileName);
     content.pop_back();
@@ -51,6 +50,11 @@ CYLevel parseFile(const char* fileName) {
     level.numFloors = getMetadataAttribute("levels",  metaDataTokens[2], false);
     level.version   = getMetadataAttribute("version", metaDataTokens[3], false);
     level.creator   = getMetadataAttribute("creator", metaDataTokens[4], true);
+    std::cout << stof(level.version) << std::endl;
+    if (stof(level.version) < 2.1) {
+        std::cout << "Version is too old!\n";
+        return {};
+    }
 
     //@TODO Combine with function in loop below
     std::vector<std::pair<std::string, std::string>> tokens;
@@ -91,12 +95,13 @@ CYLevel parseFile(const char* fileName) {
     }
 #endif
 
+    //Extraction of all the data objcts
     for (const auto& tokenPair : tokens) {
         const auto& objectName = tokenPair.first;
         const auto& data       = tokenPair.second;
-
+#ifdef DEBUG
         std::cout << "Parsing: <" << objectName << ">" << std::endl;
-
+#endif
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
         std::stack<size_t> unmatchedIndices;
