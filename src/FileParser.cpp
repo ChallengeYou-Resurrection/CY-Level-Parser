@@ -31,12 +31,16 @@ namespace {
     }
 }
 
+#define DEBUG
 CYLevel parseFile(const char* fileName) {
     CYLevel level;
     auto content = getFileContent(fileName);
     content.pop_back();
 
     auto metaDataEndLocation = content.find("Floor");
+    if (metaDataEndLocation == std::string::npos) {
+        metaDataEndLocation = content.find("floor");
+    }
     auto metadata = content.substr(0, metaDataEndLocation);
     auto objects  = content.substr(metaDataEndLocation - 1);
 
@@ -71,6 +75,7 @@ CYLevel parseFile(const char* fileName) {
                         return c == ',' || c =='#' || c == ':' || c == '[' || c == '\"' ||std::isspace(c);
                     }),
                     name.end());
+                    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
                 tokens.emplace_back(std::move(name), objects.substr(begin, length + 1));
             }
         }
@@ -79,11 +84,18 @@ CYLevel parseFile(const char* fileName) {
         }
     }
 
+#ifdef DEBUG
+    for (const auto& token : tokens) {
+        std::cout << "Token: <" << token.first << ">\n";
+        std::cout << "\tData: " << token.second << "\n";
+    }
+#endif
+
     for (const auto& tokenPair : tokens) {
         const auto& objectName = tokenPair.first;
         const auto& data       = tokenPair.second;
 
-       // std::cout << "Parsing: <" << objectName << ">" << std::endl;
+        std::cout << "Parsing: <" << objectName << ">" << std::endl;
 
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
@@ -112,7 +124,7 @@ CYLevel parseFile(const char* fileName) {
         //[[x, y], [properties], floor]
         const auto& s = sections;
         const auto& d = data;    
-        if (objectName == "Floor") {
+        if (objectName == "floor") {
             std::vector<CYFloor> floors;
             for (size_t i = 0; i < s.size() - 1; i += 8) {
                 CYFloor floor;
