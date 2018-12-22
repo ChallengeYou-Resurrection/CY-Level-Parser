@@ -54,7 +54,7 @@ void testLocal(const std::string& name) {
 
 int main() {
 
-    testLocal("51704.Lost City.mjcmarcus10.cy");
+    testLocal("8277.saw.j3fr3.cy");
     return 0;
 
     auto itr = fs::directory_iterator("../../Games");

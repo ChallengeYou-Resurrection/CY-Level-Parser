@@ -107,6 +107,7 @@ CYLevel parseFile(const char* fileName) {
         else if (objectName == "walls") {
             std::vector<CYWall> walls;
             for (size_t i = 0; i < s.size() - 1; i += 2) {
+                std::cout << d.substr(s[i + 1].first, s[i + 1].second) << '\n';
                 auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
                 auto properties = getMatchSection(s[i], d);
 
