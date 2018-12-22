@@ -16,7 +16,8 @@ namespace {
         const std::string& name, const std::string& token, bool isString) {
         return token.substr(
             name.length() + (isString ? 3 : 2),
-            token.length() - name.length() - (isString ? 6 : 4));
+            token.length() - name.length() - (isString ? 6 : 4)
+        );
     }
 
     Position extractPosition(const std::string_view& v) {
@@ -36,12 +37,24 @@ std::optional<CYLevel> parseFile(const char* fileName) {
     auto content = getFileContent(fileName);
     content.pop_back();
 
-    auto metaDataEndLocation = content.find("Floor");
+#ifdef DEBUG 
+    std::cout << "Got the file data.\n";
+#endif 
+
+    auto metaDataEndLocation = findIgnoreQuotes(content, "Floor");
     if (metaDataEndLocation == std::string::npos) {
-        metaDataEndLocation = content.find("floor");
+        metaDataEndLocation = findIgnoreQuotes(content, "floor");
     }
+#ifdef DEBUG 
+    std::cout << "Found location of floor.\n";
+#endif 
     auto metadata = content.substr(0, metaDataEndLocation);
     auto objects  = content.substr(metaDataEndLocation - 1);
+
+#ifdef DEBUG 
+    std::cout << "Object and metadata strings have been split.\n";
+    std::cout << "Metadata:\n\t" << metadata << '\n';
+#endif 
 
     auto metaDataTokens = split(metadata, '#', true);
 
@@ -50,9 +63,15 @@ std::optional<CYLevel> parseFile(const char* fileName) {
     level.numFloors = getMetadataAttribute("levels",  metaDataTokens[2], false);
     level.version   = getMetadataAttribute("version", metaDataTokens[3], false);
     level.creator   = getMetadataAttribute("creator", metaDataTokens[4], true);
-    std::cout << stof(level.version) << std::endl;
+#ifdef DEBUG 
+    std::cout   << "Metadata: \n" 
+                << "\tName:    " << level.name      << '\n'
+                << "\tFloors:  " << level.numFloors << '\n'
+                << "\tVersion: " << level.version   << '\n'
+                << "\tCreator: " << level.creator   << '\n';
+#endif 
+
     if (stof(level.version) < 2.1) {
-        std::cout << "Version is too old!\n";
         return {};
     }
 

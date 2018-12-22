@@ -1,4 +1,5 @@
 #include "FileParser.h"
+#include "Utilities.h"
 #include "Benchmark.h"
 
 #include <fstream>
@@ -57,7 +58,7 @@ void testLocal(const std::string& name) {
 
 int main() {
 #ifdef DEBUG
-    testLocal("573.AIDAN..cy");
+    testLocal("109463.Egyptian Floor Maze.tyranno96.cy");
     return 0;
 #endif
     auto itr = fs::directory_iterator("../../Games");
