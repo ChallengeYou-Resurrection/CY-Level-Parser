@@ -36,13 +36,15 @@ CYLevel parseFile(const char* fileName) {
     auto content = getFileContent(fileName);
     content.pop_back();
 
+    auto tokens = split(content, '#', true);
+/*
     //Find the index of the #Board objects, because some message might contain a #, which would 
     //cause the call to the split(...) function to split at the wrong parts
     auto left = content.find("#Board:");
     auto right = content.find("#Monster:");
 
-    auto leftTokens     = split(content.substr(0, left), '#');
-    auto rightTokens    = split(content.substr(right), '#');
+    auto leftTokens     = split(content.substr(0, left), '#', true);
+    auto rightTokens    = split(content.substr(right), '#', true);
     auto centerToken    = content.substr(left + 1, right - left - 1);
 
     std::vector<std::string> tokens;
@@ -51,7 +53,7 @@ CYLevel parseFile(const char* fileName) {
     concatenateMoveVector(tokens, leftTokens);
     tokens.push_back(centerToken);
     concatenateMoveVector(tokens, rightTokens, 1);
-
+*/
     //Extract metadata from the file
     level.name      = getMetadataAttribute("name", tokens[1], true);
     level.numFloors = getMetadataAttribute("levels", tokens[2], false);
@@ -64,7 +66,7 @@ CYLevel parseFile(const char* fileName) {
         auto objectName = token.substr(0, *nameEndIndex);
         auto data       = token.substr(*nameEndIndex + 2);
 
-        std::cout << "Parsing: " << objectName << std::endl;
+        std::cout << "Parsing: ~" << objectName << "~" << std::endl;
 
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
@@ -95,7 +97,6 @@ CYLevel parseFile(const char* fileName) {
         const auto& d = data;    
         if (objectName == "Floor") {
             std::vector<CYFloor> floors;
-
             for (size_t i = 0; i < s.size() - 1; i += 8) {
                 CYFloor floor;
                 floor.vertexA = extractPosition(getMatchSection(s[i    ], d));
@@ -131,12 +132,11 @@ CYLevel parseFile(const char* fileName) {
         }
         else {    
             std::vector<CYObject> objects; 
+            std::cout << "\tN: " << s.size() << "\n";
             for (size_t i = 0; i < s.size() - 1; i += 3) {
                 auto fullData = getMatchSection(s[i + 2], d);
-
-                if (objectName == "Board") {
-                    std::cout << fullData << std::endl;
-                }
+                std::cout << "\tObject: " << objectName << "\n";
+                if (objectName == "Portal") std::cout << fullData << std::endl;
 
                 CYObject object;
                 object.position     = extractPosition(getMatchSection(s[i], d));
