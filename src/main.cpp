@@ -8,7 +8,7 @@
 namespace fs = std::filesystem;
 
 void writeLevel(const std::string& name, const CYLevel& level) {
-    std::ofstream outfile("../../out/" + name + ".out");
+    std::ofstream outfile("../../sample_out/" + name + ".out");
     outfile << "Name:    "  << level.name           << '\n' 
             << "Author:  "  << level.creator        << '\n' 
             << "Version: "  << level.version        << '\n'
@@ -43,7 +43,7 @@ void writeLevel(const std::string& name, const CYLevel& level) {
 }
 
 std::optional<CYLevel> readFile(const std::string& name) {
-    std::cout << "Trying: " << name << '\n';
+    std::cout << "Parsing: " << name << '\n';
     return parseFile(name.c_str());
 }
 
@@ -57,7 +57,7 @@ void testLocal(const std::string& name) {
 }
 
 int main() {
-    auto itr = fs::directory_iterator("../../Games");
+    auto itr = fs::directory_iterator("../../sample");
     for (const auto& path : itr) {
         try {
             const std::string name = path.path().filename().string();
