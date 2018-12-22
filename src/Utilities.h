@@ -38,13 +38,17 @@ std::optional<size_t> indexOf(const std::string& string, char token);
  * @return std::vector<std::string> The tokens
  */
 template<typename Iterable>
-std::vector<std::string> split(const Iterable& string, char deliminator) {
+std::vector<std::string> split(const Iterable& string, char deliminator, bool ignoreString = false) {
     std::vector<std::string> tokens;
     std::string token = "";
+    bool isInString = false;
     for (auto c : string) {
-        if (c == deliminator) {
+        if (c == deliminator && !isInString) {
             tokens.push_back(std::move(token));
             continue;
+        }
+        else if (c == '\"' && ignoreString) {
+            isInString = !isInString;
         }
         token.push_back(c);
     }
