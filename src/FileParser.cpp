@@ -45,6 +45,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
     if (metaDataEndLocation == std::string::npos) {
         metaDataEndLocation = findIgnoreQuotes(content, "floor");
     }
+    if (metaDataEndLocation == std::string::npos) {
+        return {};
+    } 
 #ifdef DEBUG 
     std::cout << "Found location of floor.\n";
 #endif 
@@ -71,6 +74,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 << "\tCreator: " << level.creator   << '\n';
 #endif 
 
+    if (level.version[0] == '1') {
+        return {};
+    }
     if (stof(level.version) < 2.1) {
         return {};
     }
