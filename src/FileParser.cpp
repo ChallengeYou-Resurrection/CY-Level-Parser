@@ -36,37 +36,54 @@ CYLevel parseFile(const char* fileName) {
     auto content = getFileContent(fileName);
     content.pop_back();
 
-    auto tokens = split(content, '#', true);
-/*
-    //Find the index of the #Board objects, because some message might contain a #, which would 
-    //cause the call to the split(...) function to split at the wrong parts
-    auto left = content.find("#Board:");
-    auto right = content.find("#Monster:");
+    auto metaDataEndLocation = content.find("Floor");
+    auto metadata = content.substr(0, metaDataEndLocation);
+    auto objects  = content.substr(metaDataEndLocation - 1);
 
-    auto leftTokens     = split(content.substr(0, left), '#', true);
-    auto rightTokens    = split(content.substr(right), '#', true);
-    auto centerToken    = content.substr(left + 1, right - left - 1);
+    auto metaDataTokens = split(metadata, '#', true);
 
-    std::vector<std::string> tokens;
-    tokens.reserve(leftTokens.size() + rightTokens.size() + centerToken.size() + 16);
-
-    concatenateMoveVector(tokens, leftTokens);
-    tokens.push_back(centerToken);
-    concatenateMoveVector(tokens, rightTokens, 1);
-*/
     //Extract metadata from the file
-    level.name      = getMetadataAttribute("name", tokens[1], true);
-    level.numFloors = getMetadataAttribute("levels", tokens[2], false);
-    level.version   = getMetadataAttribute("version", tokens[3], false);
-    level.creator   = getMetadataAttribute("creator", tokens[4], true);
+    level.name      = getMetadataAttribute("name",    metaDataTokens[1], true);
+    level.numFloors = getMetadataAttribute("levels",  metaDataTokens[2], false);
+    level.version   = getMetadataAttribute("version", metaDataTokens[3], false);
+    level.creator   = getMetadataAttribute("creator", metaDataTokens[4], true);
 
-    std::for_each(tokens.cbegin() + 5, tokens.cend(), [&level](const std::string& token) {
-        //Find the name of this object
-        auto nameEndIndex = indexOf(token, ':');
-        auto objectName = token.substr(0, *nameEndIndex);
-        auto data       = token.substr(*nameEndIndex + 2);
+    //@TODO Combine with function in loop below
+    std::vector<std::pair<std::string, std::string>> tokens;
+    bool isInsideString = false;
+    std::stack<size_t> unmatchedIndices;
+    std::string name;
+    for (size_t i = 0; i < objects.length(); i++) {
+        auto c = objects[i];
+        if (unmatchedIndices.empty()) {
+            name.push_back(c);
+        }
+        if (c == '[' && !isInsideString) {
+            unmatchedIndices.push(i);
+        }
+        else if (c == ']' && !isInsideString) {
+            auto begin  = unmatchedIndices.top();
+            auto length = i - begin;
+            unmatchedIndices.pop();
+            if (unmatchedIndices.empty()) {
+                name.erase(
+                    std::remove_if(name.begin(), name.end(), [](char c) {
+                        return c == ',' || c =='#' || c == ':' || c == '[' || std::isspace(c);
+                    }),
+                    name.end());
+                tokens.emplace_back(std::move(name), objects.substr(begin, length + 1));
+            }
+        }
+        else if (c == '\"') {
+            isInsideString = !isInsideString;
+        }
+    }
 
-        std::cout << "Parsing: ~" << objectName << "~" << std::endl;
+    for (const auto& tokenPair : tokens) {
+        const auto& objectName = tokenPair.first;
+        const auto& data       = tokenPair.second;
+
+        std::cout << "Parsing: <" << objectName << ">" << std::endl;
 
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
@@ -132,11 +149,10 @@ CYLevel parseFile(const char* fileName) {
         }
         else {    
             std::vector<CYObject> objects; 
-            std::cout << "\tN: " << s.size() << "\n";
+            std::cout << "\tObjects: " << s.size() << std::endl;
+
             for (size_t i = 0; i < s.size() - 1; i += 3) {
                 auto fullData = getMatchSection(s[i + 2], d);
-                std::cout << "\tObject: " << objectName << "\n";
-                if (objectName == "Portal") std::cout << fullData << std::endl;
 
                 CYObject object;
                 object.position     = extractPosition(getMatchSection(s[i], d));
@@ -146,7 +162,7 @@ CYLevel parseFile(const char* fileName) {
             }
             level.objects.emplace(std::string(objectName.data()), std::move(objects));
         }
-    });
-    
+    };
+
     return level;
 }
