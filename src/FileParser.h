@@ -3,8 +3,6 @@
 #include <optional>
 #include "CYObject.h"
 
-//#define DEBUG
-
 /**
  * @brief Parses the CY Level format to extract the data from it
  * 

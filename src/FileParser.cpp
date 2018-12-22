@@ -48,10 +48,6 @@ std::optional<CYLevel> parseFile(const char* fileName) {
     auto content = getFileContent(fileName);
     content.pop_back();
 
-#ifdef DEBUG 
-    std::cout << "Got the file data.\n";
-#endif 
-
     auto metaDataEndLocation = findIgnoreQuotes(content, "Floor");
     if (metaDataEndLocation == std::string::npos) {
         metaDataEndLocation = findIgnoreQuotes(content, "floor");
@@ -60,31 +56,16 @@ std::optional<CYLevel> parseFile(const char* fileName) {
         errors.emplace_back(fileName, "Cannot find #Floor section");
         return {};
     } 
-#ifdef DEBUG 
-    std::cout << "Found location of floor.\n";
-#endif 
+
     auto metadata = content.substr(0, metaDataEndLocation);
     auto objects  = content.substr(metaDataEndLocation - 1);
-
-#ifdef DEBUG 
-    std::cout << "Object and metadata strings have been split.\n";
-    std::cout << "Metadata:\n\t" << metadata << '\n';
-#endif 
-
     auto metaDataTokens = split(metadata, '#', true);
 
     //Extract metadata from the file
     level.name      = getMetadataAttribute("name",    metaDataTokens[1], true);
     level.numFloors = getMetadataAttribute("levels",  metaDataTokens[2], false);
     level.version   = getMetadataAttribute("version", metaDataTokens[3], false);
-    level.creator   = getMetadataAttribute("creator", metaDataTokens[4], true);
-#ifdef DEBUG 
-    std::cout   << "Metadata: \n" 
-                << "\tName:    " << level.name      << '\n'
-                << "\tFloors:  " << level.numFloors << '\n'
-                << "\tVersion: " << level.version   << '\n'
-                << "\tCreator: " << level.creator   << '\n';
-#endif 
+    level.creator   = getMetadataAttribute("creator", metaDataTokens[4], true); 
 
     if (level.version[0] == '1') {
         errors.emplace_back(fileName, "Version 1");
@@ -127,23 +108,10 @@ std::optional<CYLevel> parseFile(const char* fileName) {
         }
     }
 
-#ifdef DEBUG
-    for (const auto& token : tokens) {
-        std::cout << "Token: <" << token.first << ">\n";
-        std::cout << "\tData: " << token.second << "\n";
-    }
-#endif
-
     //Extraction of all the data objcts
-#ifdef DEBUG
-    std::cout << "\n\n Begin data extraction\n\n";
-#endif
     for (const auto& tokenPair : tokens) {
         const auto& objectName = tokenPair.first;
         const auto& data       = tokenPair.second;
-#ifdef DEBUG
-        std::cout << "Parsing: <" << objectName << ">" << std::endl;
-#endif
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
         std::stack<size_t> unmatchedIndices;

@@ -57,11 +57,6 @@ void testLocal(const std::string& name) {
 }
 
 int main() {
-#ifdef DEBUG
-    testLocal("20364.The Impossible.Archerman153.cy");
-    printErrors();
-    return 0;
-#endif
     auto itr = fs::directory_iterator("../../Games");
     for (const auto& path : itr) {
         try {
