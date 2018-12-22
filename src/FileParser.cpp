@@ -68,7 +68,7 @@ CYLevel parseFile(const char* fileName) {
             if (unmatchedIndices.empty()) {
                 name.erase(
                     std::remove_if(name.begin(), name.end(), [](char c) {
-                        return c == ',' || c =='#' || c == ':' || c == '[' || std::isspace(c);
+                        return c == ',' || c =='#' || c == ':' || c == '[' || c == '\"' ||std::isspace(c);
                     }),
                     name.end());
                 tokens.emplace_back(std::move(name), objects.substr(begin, length + 1));
@@ -83,7 +83,7 @@ CYLevel parseFile(const char* fileName) {
         const auto& objectName = tokenPair.first;
         const auto& data       = tokenPair.second;
 
-        std::cout << "Parsing: <" << objectName << ">" << std::endl;
+       // std::cout << "Parsing: <" << objectName << ">" << std::endl;
 
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
@@ -149,8 +149,6 @@ CYLevel parseFile(const char* fileName) {
         }
         else {    
             std::vector<CYObject> objects; 
-            std::cout << "\tObjects: " << s.size() << std::endl;
-
             for (size_t i = 0; i < s.size() - 1; i += 3) {
                 auto fullData = getMatchSection(s[i + 2], d);
 
