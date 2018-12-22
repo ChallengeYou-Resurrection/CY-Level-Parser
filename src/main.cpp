@@ -58,7 +58,8 @@ void testLocal(const std::string& name) {
 
 int main() {
 #ifdef DEBUG
-    testLocal("541.TheCastle.heCastle.cy");
+    testLocal("20364.The Impossible.Archerman153.cy");
+    printErrors();
     return 0;
 #endif
     auto itr = fs::directory_iterator("../../Games");
@@ -76,5 +77,6 @@ int main() {
             return 0;
         }
     }
+    printErrors();
     return 0;
 }

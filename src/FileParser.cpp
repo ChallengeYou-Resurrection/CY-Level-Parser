@@ -32,6 +32,17 @@ namespace {
     }
 }
 
+struct Error {
+    Error(std::string name, std::string error)
+    :   name    (name)
+    ,   reason  (error) 
+    {}
+
+    std::string name;
+    std::string reason;
+};
+std::vector<Error> errors;
+
 std::optional<CYLevel> parseFile(const char* fileName) {
     CYLevel level;
     auto content = getFileContent(fileName);
@@ -46,6 +57,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
         metaDataEndLocation = findIgnoreQuotes(content, "floor");
     }
     if (metaDataEndLocation == std::string::npos) {
+        errors.emplace_back(fileName, "Cannot find #Floor section");
         return {};
     } 
 #ifdef DEBUG 
@@ -75,9 +87,11 @@ std::optional<CYLevel> parseFile(const char* fileName) {
 #endif 
 
     if (level.version[0] == '1') {
+        errors.emplace_back(fileName, "Version 1");
         return {};
     }
     if (stof(level.version) < 2.1) {
+        errors.emplace_back(fileName, "Version older than 2.1");
         return {};
     }
 
@@ -121,6 +135,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
 #endif
 
     //Extraction of all the data objcts
+#ifdef DEBUG
+    std::cout << "\n\n Begin data extraction\n\n";
+#endif
     for (const auto& tokenPair : tokens) {
         const auto& objectName = tokenPair.first;
         const auto& data       = tokenPair.second;
@@ -171,6 +188,10 @@ std::optional<CYLevel> parseFile(const char* fileName) {
         else if (objectName == "walls") {
             std::vector<CYWall> walls;
             for (size_t i = 0; i < s.size() - 1; i += 2) {
+                if (data.find("<Void>") != std::string::npos) {
+                    errors.emplace_back(fileName, "Wall contains '<Void>'");
+                    return {};
+                }
                 auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
                 auto properties = getMatchSection(s[i], d);
 
@@ -205,4 +226,13 @@ std::optional<CYLevel> parseFile(const char* fileName) {
     };
 
     return level;
+}
+
+void printErrors() {
+    std::cout << "\n=======================================\n";
+    std::cout << "Printing all error levels came across: \n";
+    for (const auto& error : errors) {
+        std::cout   << "File: " << error.name << "\n"
+                    << "\tReason: " << error.reason << "\n\n";
+    }
 }
