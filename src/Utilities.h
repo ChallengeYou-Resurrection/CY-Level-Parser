@@ -31,6 +31,15 @@ std::string getFileContent(const char* fileName);
 std::optional<size_t> indexOf(const std::string& string, char token);
 
 /**
+ * @brief Reimplemenation of std::basic_string::find, but ignores the word to look for inside of quotes
+ * 
+ * @param str The string to search inside
+ * @param search The string to search for
+ * @return size_t The index of the first character
+ */
+size_t findIgnoreQuotes(const std::string& str, const std::string& search);
+
+/**
  * @brief Splits a string at a deliminator into seperate tokens
  * 
  * @param string The string to split
