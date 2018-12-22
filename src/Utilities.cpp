@@ -27,3 +27,25 @@ std::optional<size_t> indexOf(const std::string& string, char token) {
     }
     return {};
 }
+
+size_t findIgnoreQuotes(const std::string& str, const std::string& search) {
+    bool isInQuotes = false;
+    std::string buffer;
+    for (size_t i = 0; i < str.length(); i++) {
+        if (str[i] == '\"') {
+            buffer.clear();
+            isInQuotes = !isInQuotes;
+            continue;
+        }
+        if (str[i] == search[buffer.length()] && !isInQuotes) {
+            buffer.push_back(str[i]);
+            if (buffer.length() == search.length()) {
+                return i - search.length() + 1;
+            }
+        }
+        else {
+            buffer.clear();
+        }
+    }
+    return std::string::npos;
+}

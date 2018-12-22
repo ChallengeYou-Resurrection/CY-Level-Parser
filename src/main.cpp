@@ -1,4 +1,5 @@
 #include "FileParser.h"
+#include "Utilities.h"
 #include "Benchmark.h"
 
 #include <fstream>
@@ -41,20 +42,36 @@ void writeLevel(const std::string& name, const CYLevel& level) {
     }
 }
 
-int main() {
+std::optional<CYLevel> readFile(const std::string& name) {
+    std::cout << "Trying: " << name << '\n';
+    return parseFile(name.c_str());
+}
 
+void testLocal(const std::string& name) {
+    std::string path = "../../Games/" + name;
+    auto level = readFile(path);
+    if (level) {
+        std::cout << "Writing level!\n";
+        writeLevel(name, *level);
+    }   
+}
+
+int main() {
     auto itr = fs::directory_iterator("../../Games");
     for (const auto& path : itr) {
         try {
             const std::string name = path.path().filename().string();
-            std::cout << "Trying: " << name << '\n';
-            auto level = parseFile(path.path().c_str());
-            writeLevel(name, level);
-            std::cout << "Sucess\n\n";
+            auto level = readFile(path.path().c_str());
+            if (level) {
+                writeLevel(name, *level);
+            }   
         }
         catch (std::exception& e) {
             std::cout << "Cannot parse: " << path.path().string() << '\n';
+            std::cout << e.what() << '\n';
+            return 0;
         }
     }
+    printErrors();
     return 0;
 }

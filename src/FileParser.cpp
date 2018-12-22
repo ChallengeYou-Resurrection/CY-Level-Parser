@@ -16,7 +16,8 @@ namespace {
         const std::string& name, const std::string& token, bool isString) {
         return token.substr(
             name.length() + (isString ? 3 : 2),
-            token.length() - name.length() - (isString ? 6 : 4));
+            token.length() - name.length() - (isString ? 6 : 4)
+        );
     }
 
     Position extractPosition(const std::string_view& v) {
@@ -31,45 +32,103 @@ namespace {
     }
 }
 
+struct Error {
+    Error(std::string name, std::string error)
+    :   name    (name)
+    ,   reason  (error) 
+    {}
 
+    std::string name;
+    std::string reason;
+};
+std::vector<Error> errors;
 
-CYLevel parseFile(const char* fileName) {
+std::optional<CYLevel> parseFile(const char* fileName) {
     CYLevel level;
     auto content = getFileContent(fileName);
     content.pop_back();
-    auto tokens = split(content, '#');
 
-    level.name      = getMetadataAttribute("name", tokens[1], true);
-    level.numFloors = getMetadataAttribute("levels", tokens[2], false);
-    level.version   = getMetadataAttribute("version", tokens[3], false);
-    level.creator   = getMetadataAttribute("creator", tokens[4], true);
+    auto metaDataEndLocation = findIgnoreQuotes(content, "Floor");
+    if (metaDataEndLocation == std::string::npos) {
+        metaDataEndLocation = findIgnoreQuotes(content, "floor");
+    }
+    if (metaDataEndLocation == std::string::npos) {
+        errors.emplace_back(fileName, "Cannot find #Floor section");
+        return {};
+    } 
 
+    auto metadata = content.substr(0, metaDataEndLocation);
+    auto objects  = content.substr(metaDataEndLocation - 1);
+    auto metaDataTokens = split(metadata, '#', true);
 
-    float version = stof(level.version);
-    if (version < 3.6) {
-        return level;
+    //Extract metadata from the file
+    level.name      = getMetadataAttribute("name",    metaDataTokens[1], true);
+    level.numFloors = getMetadataAttribute("levels",  metaDataTokens[2], false);
+    level.version   = getMetadataAttribute("version", metaDataTokens[3], false);
+    level.creator   = getMetadataAttribute("creator", metaDataTokens[4], true); 
+
+    if (level.version[0] == '1') {
+        errors.emplace_back(fileName, "Version 1");
+        return {};
+    }
+    if (stof(level.version) < 2.1) {
+        errors.emplace_back(fileName, "Version older than 2.1");
+        return {};
     }
 
-    std::cout << "Begin\n";
-    std::for_each(tokens.cbegin() + 5, tokens.cend(), [&level](const std::string& token) {
-        //Find the name of this object
-        auto nameEndIndex = indexOf(token, ':');
-        auto objectName = token.substr(0, *nameEndIndex);
-        auto data       = token.substr(*nameEndIndex + 2);
+    //@TODO Combine with function in loop below
+    std::vector<std::pair<std::string, std::string>> tokens;
+    bool isInsideString = false;
+    std::stack<size_t> unmatchedIndices;
+    std::string name;
+    for (size_t i = 0; i < objects.length(); i++) {
+        auto c = objects[i];
+        if (unmatchedIndices.empty()) {
+            name.push_back(c);
+        }
+        if (c == '[' && !isInsideString) {
+            unmatchedIndices.push(i);
+        }
+        else if (c == ']' && !isInsideString) {
+            auto begin  = unmatchedIndices.top();
+            auto length = i - begin;
+            unmatchedIndices.pop();
+            if (unmatchedIndices.empty()) {
+                name.erase(
+                    std::remove_if(name.begin(), name.end(), [](char c) {
+                        return c == ',' || c =='#' || c == ':' || c == '[' || c == '\"' ||std::isspace(c);
+                    }),
+                    name.end());
+                    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+                tokens.emplace_back(std::move(name), objects.substr(begin, length + 1));
+            }
+        }
+        else if (c == '\"') {
+            isInsideString = !isInsideString;
+        }
+    }
 
+    //Extraction of all the data objcts
+    for (const auto& tokenPair : tokens) {
+        const auto& objectName = tokenPair.first;
+        const auto& data       = tokenPair.second;
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
         std::stack<size_t> unmatchedIndices;
+        bool isInsideString = false;
         for (size_t i = 0; i < data.length(); i++) {
             auto c = data[i];
-            if (c == '[') {
+            if (c == '[' && !isInsideString) {
                 unmatchedIndices.push(i);
             }
-            else if (c == ']') {
+            else if (c == ']' && !isInsideString) {
                 auto begin  = unmatchedIndices.top();
                 auto length = i - begin;
                 unmatchedIndices.pop();
                 sections.emplace_back(begin + 1, length - 1);
+            }
+            else if (c == '\"') {
+                isInsideString = !isInsideString;
             }
         }
         
@@ -80,9 +139,8 @@ CYLevel parseFile(const char* fileName) {
         //[[x, y], [properties], floor]
         const auto& s = sections;
         const auto& d = data;    
-        if (objectName == "Floor") {
+        if (objectName == "floor") {
             std::vector<CYFloor> floors;
-
             for (size_t i = 0; i < s.size() - 1; i += 8) {
                 CYFloor floor;
                 floor.vertexA = extractPosition(getMatchSection(s[i    ], d));
@@ -98,6 +156,10 @@ CYLevel parseFile(const char* fileName) {
         else if (objectName == "walls") {
             std::vector<CYWall> walls;
             for (size_t i = 0; i < s.size() - 1; i += 2) {
+                if (data.find("<Void>") != std::string::npos) {
+                    errors.emplace_back(fileName, "Wall contains '<Void>'");
+                    return {};
+                }
                 auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
                 auto properties = getMatchSection(s[i], d);
 
@@ -129,7 +191,16 @@ CYLevel parseFile(const char* fileName) {
             }
             level.objects.emplace(std::string(objectName.data()), std::move(objects));
         }
-    });
-    
+    };
+
     return level;
+}
+
+void printErrors() {
+    std::cout << "\n=======================================\n";
+    std::cout << "Printing all error levels came across: \n";
+    for (const auto& error : errors) {
+        std::cout   << "File: " << error.name << "\n"
+                    << "\tReason: " << error.reason << "\n\n";
+    }
 }
