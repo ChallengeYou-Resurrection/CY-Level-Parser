@@ -69,16 +69,20 @@ CYLevel parseFile(const char* fileName) {
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
         std::stack<size_t> unmatchedIndices;
+        bool isInsideString = false;
         for (size_t i = 0; i < data.length(); i++) {
             auto c = data[i];
-            if (c == '[') {
+            if (c == '[' && !isInsideString) {
                 unmatchedIndices.push(i);
             }
-            else if (c == ']') {
+            else if (c == ']' && !isInsideString) {
                 auto begin  = unmatchedIndices.top();
                 auto length = i - begin;
                 unmatchedIndices.pop();
                 sections.emplace_back(begin + 1, length - 1);
+            }
+            else if (c == '\"') {
+                isInsideString = !isInsideString;
             }
         }
         
@@ -107,7 +111,6 @@ CYLevel parseFile(const char* fileName) {
         else if (objectName == "walls") {
             std::vector<CYWall> walls;
             for (size_t i = 0; i < s.size() - 1; i += 2) {
-                std::cout << d.substr(s[i + 1].first, s[i + 1].second) << '\n';
                 auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
                 auto properties = getMatchSection(s[i], d);
 
@@ -130,6 +133,10 @@ CYLevel parseFile(const char* fileName) {
             std::vector<CYObject> objects; 
             for (size_t i = 0; i < s.size() - 1; i += 3) {
                 auto fullData = getMatchSection(s[i + 2], d);
+
+                if (objectName == "Board") {
+                    std::cout << fullData << std::endl;
+                }
 
                 CYObject object;
                 object.position     = extractPosition(getMatchSection(s[i], d));
