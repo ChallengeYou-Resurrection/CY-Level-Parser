@@ -10,6 +10,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(SOURCES
 	src/main.cpp
+	src/CYObject.cpp
 	src/FileParser.cpp
 	src/Utilities.cpp
 )

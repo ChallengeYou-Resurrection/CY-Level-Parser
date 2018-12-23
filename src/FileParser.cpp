@@ -23,7 +23,9 @@ namespace {
         std::string name;
         std::string reason;
     };
+    std::vector<Error> errors;
 
+    //Get the Metadata Attributes from the header of a level file
     std::string getMetadataAttribute(
         const std::string& name, const std::string& token, bool isString) {
         return token.substr(
@@ -32,6 +34,7 @@ namespace {
         );
     }
 
+    //Extracts a position from a string
     Position extractPosition(const std::string_view& v) {
         auto pos = split(v, ',');
         auto x = std::stoi(pos[0]);
@@ -39,12 +42,25 @@ namespace {
         return {x, z};
     }
 
+    //Gets a section of the data string between two [ ] as defined by `match` parameter
     std::string_view getMatchSection(const BracketMatch& match, const std::string& data) {
         return std::string_view(data.data() + match.first, match.second);
     }
-}
 
-std::vector<Error> errors;
+    //Extracts the properties from a string which does not contain a message
+    std::vector<std::string> extractProperties(const std::string& properties) {
+        auto propertyList = split(properties, ',', true, '(', ')');
+        for (auto& p : propertyList) {
+            removeFrom(p, {' ', '[', ']'});
+        }
+        return propertyList;
+    }
+
+    //Extracts the properties from a string which contains a message
+    std::vector<std::string> extractPropertiesMessage(const std::string& properties) {
+        return split(properties, ',', true);
+    }
+}
 
 std::optional<CYLevel> parseFile(const char* fileName) {
     CYLevel level;
@@ -111,6 +127,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
     for (const auto& tokenPair : tokens) {
         const auto& objectName = tokenPair.first;
         const auto& data       = tokenPair.second;
+
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
         std::stack<size_t> unmatchedIndices;
@@ -140,14 +157,15 @@ std::optional<CYLevel> parseFile(const char* fileName) {
         const auto& d = data;    
         if (objectName == "floor") {
             std::vector<CYFloor> floors;
+            uint8_t floorNumber = 0;
             for (size_t i = 0; i < s.size() - 1; i += 8) {
                 CYFloor floor;
                 floor.vertexA = extractPosition(getMatchSection(s[i    ], d));
                 floor.vertexB = extractPosition(getMatchSection(s[i + 1], d));
                 floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
                 floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
-                floor.properties = d.substr(s[i + 6].first, s[i + 6].second);
-                floor.floor = i % 8;
+                floor.properties = extractProperties(d.substr(s[i + 6].first, s[i + 6].second));
+                floor.floor = ++floorNumber;
                 floors.push_back(floor);
             }
             level.floors = std::move(floors);
@@ -160,7 +178,6 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     return {};
                 }
                 auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
-                auto properties = getMatchSection(s[i], d);
 
                 int xOffset = std::stoi(tokens[0]);
                 int zOffset = std::stoi(tokens[1]);
@@ -171,8 +188,10 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 CYWall wall;
                 wall.beginPoint = {xBegin,              zBegin};
                 wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
-                wall.properties = properties;
+                wall.properties = extractProperties(d.substr(s[i].first, s[i].second));//   properties);
                 wall.floor      = std::stoi(tokens.back());
+                wall.verifyPropertyCount();
+
                 walls.push_back(wall);
             }
             level.walls = std::move(walls);
@@ -183,14 +202,35 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 auto fullData = getMatchSection(s[i + 2], d);
 
                 CYObject object;
-                object.position     = extractPosition(getMatchSection(s[i], d));
-                object.properties   = d.substr( s[i + 1].first, s[i + 1].second);
-                object.floor        = std::stoi(split(fullData, ',').back());
+                if (objectName == "board" || objectName == "portal") {
+                    object.properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));;
+                } else {
+                    object.properties = extractProperties(d.substr(s[i + 1].first, s[i + 1].second));;
+                }
+
+                if (objectName == "backmusic") {
+                    level.backmusic = std::stoi(object.properties[0]);
+                    continue;
+                }
+                else if (objectName == "weather") {
+                    level.weather = std::stoi(object.properties[0]);
+                    continue;
+                }
+                else if (objectName == "theme") {
+                    level.theme = std::stoi(object.properties[0]);
+                    continue;
+                }
+                object.position = extractPosition(getMatchSection(s[i], d));
+                object.floor = std::stoi(split(fullData, ',').back());
+                object.verifyPropertyCount(objectName);
+
                 objects.push_back(object);
             }
-            level.objects.emplace(std::string(objectName.data()), std::move(objects));
+            if (!(objectName == "backmusic" || objectName == "weather" || objectName == "theme")) {
+                level.objects.emplace(std::string(objectName.data()), std::move(objects));
+            }
         }
-    };
+    }
 
     return level;
 }

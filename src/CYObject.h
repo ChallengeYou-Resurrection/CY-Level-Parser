@@ -20,8 +20,10 @@ struct Position {
  */
 struct CYObject {
     Position position; 
-    std::string properties;
+    std::vector<std::string> properties;
     uint8_t floor;
+
+    void verifyPropertyCount(const std::string& name);
 };
 
 struct CYFloor {
@@ -29,15 +31,17 @@ struct CYFloor {
     Position vertexB;
     Position vertexC;
     Position vertexD;
-    std::string properties;
+    std::vector<std::string> properties;
     uint8_t floor;
 };
 
 struct CYWall {
     Position beginPoint;
     Position endPoint;
-    std::string properties;
+    std::vector<std::string> properties;
     uint8_t floor;
+
+    void verifyPropertyCount();
 };
 
 //@TODO Change back to 
@@ -47,6 +51,9 @@ struct CYLevel {
     std::string creator;
     std::string version;
     std::string numFloors;
+    int         backmusic   = 1;
+    int         theme       = 1;
+    int         weather     = 1;
 
     CYObjectMap objects;
     std::vector<CYFloor> floors;
