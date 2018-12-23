@@ -32,7 +32,8 @@ std::string getFileContent(const char* fileName);
 std::optional<size_t> indexOf(const std::string& string, char token);
 
 /**
- * @brief Reimplemenation of std::basic_string::find, but ignores the word to look for inside of quotes
+ * @brief Reimplemenation of std::basic_string::find, but ignores the word to look for 
+ * inside of quotes
  * 
  * @param str The string to search inside
  * @param search The string to search for
@@ -41,24 +42,32 @@ std::optional<size_t> indexOf(const std::string& string, char token);
 size_t findIgnoreQuotes(const std::string& str, const std::string& search);
 
 /**
- * @brief Splits a string at a deliminator into seperate tokens
+ * @brief Splits a string at a deliminator into seperate tokens, with the ability to 
+ * ignore the deliminator between two distinct chars
  * 
  * @param string The string to split
  * @param deliminator Character to split the string at
+ * @param ignoreBegin
  * @return std::vector<std::string> The tokens
  */
 template<typename Iterable>
-std::vector<std::string> split(const Iterable& string, char deliminator, bool ignoreString = false) {
+std::vector<std::string> split(const Iterable& string,  char deliminator, bool shouldIgnore = false,
+                               char ignoreBegin = '\"', char ignoreEnd = '\"') {
     std::vector<std::string> tokens;
     std::string token = "";
-    bool isInString = false;
+    bool isIgnoring = false;
     for (auto c : string) {
-        if (c == deliminator && !isInString) {
+        if (c == deliminator && !isIgnoring) {
             tokens.push_back(std::move(token));
             continue;
         }
-        else if (c == '\"' && ignoreString) {
-            isInString = !isInString;
+        else if (shouldIgnore) {
+            if (!isIgnoring && c == ignoreBegin) {
+                isIgnoring = true;
+            }
+            else if (isIgnoring && c == ignoreEnd) {
+                isIgnoring = false;
+            }
         }
         token.push_back(c);
     }
