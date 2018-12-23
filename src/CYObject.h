@@ -22,6 +22,8 @@ struct CYObject {
     Position position; 
     std::vector<std::string> properties;
     uint8_t floor;
+
+    void verifyPropertyCount(const std::string& name);
 };
 
 struct CYFloor {
@@ -31,6 +33,8 @@ struct CYFloor {
     Position vertexD;
     std::vector<std::string> properties;
     uint8_t floor;
+    
+    void verifyPropertyCount(const std::string& name);
 };
 
 struct CYWall {
@@ -38,6 +42,8 @@ struct CYWall {
     Position endPoint;
     std::vector<std::string> properties;
     uint8_t floor;
+
+    void verifyPropertyCount(const std::string& name);
 };
 
 //@TODO Change back to 

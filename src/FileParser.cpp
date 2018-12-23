@@ -220,6 +220,8 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     level.theme = std::stoi(object.properties[0]);
                     continue;
                 }
+                
+                object.verifyPropertyCount(objectName);
 
 
                 object.floor = std::stoi(split(fullData, ',').back());
