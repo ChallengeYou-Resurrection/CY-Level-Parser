@@ -178,7 +178,6 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     return {};
                 }
                 auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
-                auto properties = getMatchSection(s[i], d);
 
                 int xOffset = std::stoi(tokens[0]);
                 int zOffset = std::stoi(tokens[1]);
@@ -209,13 +208,26 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     object.properties = extractProperties(d.substr(s[i + 1].first, s[i + 1].second));;
                 }
 
+                if (objectName == "backmusic") {
+                    level.backmusic = std::stoi(object.properties[0]);
+                    continue;
+                }
+                else if (objectName == "weather") {
+                    level.weather = std::stoi(object.properties[0]);
+                    continue;
+                }
+                else if (objectName == "theme") {
+                    level.theme = std::stoi(object.properties[0]);
+                    continue;
+                }
 
-                object.floor        = std::stoi(split(fullData, ',').back());
+
+                object.floor = std::stoi(split(fullData, ',').back());
                 objects.push_back(object);
             }
             level.objects.emplace(std::string(objectName.data()), std::move(objects));
         }
-    };
+    }
 
     return level;
 }
