@@ -7,6 +7,7 @@
 
 namespace fs = std::filesystem;
 
+//This is tempory for testing, will be changed later
 void writeLevel(const std::string& name, const CYLevel& level) {
     std::ofstream outfile("../../sample_out/" + name + ".out");
     outfile << "Name:    "  << level.name           << '\n' 
@@ -20,8 +21,12 @@ void writeLevel(const std::string& name, const CYLevel& level) {
                 << "\tVertex 2:   " << floor.vertexB.x << " " << floor.vertexB.z << '\n'
                 << "\tVertex 3:   " << floor.vertexC.x << " " << floor.vertexC.z << '\n'
                 << "\tVertex 4:   " << floor.vertexD.x << " " << floor.vertexD.z << '\n'
-                << "\tProperties: " << floor.properties << '\n'
-                << "\tFloors:     " << (int)floor.floor << "\n\n";
+                << "\tFloor:      " << (int)floor.floor << '\n'
+                << "\tProperties: ";
+        for (const auto& p : floor.properties) {
+            outfile << p << ' ';
+        }
+        outfile << "\n\n";
     }
 
     outfile << "Walls\n";
@@ -36,8 +41,12 @@ void writeLevel(const std::string& name, const CYLevel& level) {
         outfile << cyObject.first << '\n';
         for (const auto& obj : cyObject.second) {
             outfile << "\tPosition:   " << obj.position.x << " " << obj.position.z << '\n'
-                    << "\tProperties: " << obj.properties << '\n'
-                    << "\tFloor:      " << (int)obj.floor << "\n\n";
+                    << "\tFloor:      " << (int)obj.floor << '\n'
+                    << "\tProperties: ";
+            for (const auto& p : obj.properties) {
+                outfile << p << ' ';
+            }
+            outfile << "\n\n";
         }
     }
 }

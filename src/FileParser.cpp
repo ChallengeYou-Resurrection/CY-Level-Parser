@@ -49,7 +49,11 @@ namespace {
 
     //Extracts the properties from a string which does not contain a message
     std::vector<std::string> extractProperties(const std::string& properties) {
-        return split(properties, ',', true, '(', ')');
+        auto propertyList = split(properties, ',', true, '(', ')');
+        for (auto& p : propertyList) {
+            removeFrom(p, {' ', '[', ']'});
+        }
+        return propertyList;
     }
 
     //Extracts the properties from a string which contains a message
@@ -153,15 +157,15 @@ std::optional<CYLevel> parseFile(const char* fileName) {
         const auto& d = data;    
         if (objectName == "floor") {
             std::vector<CYFloor> floors;
+            uint8_t floorNumber = 0;
             for (size_t i = 0; i < s.size() - 1; i += 8) {
                 CYFloor floor;
                 floor.vertexA = extractPosition(getMatchSection(s[i    ], d));
                 floor.vertexB = extractPosition(getMatchSection(s[i + 1], d));
                 floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
                 floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
-                floor.properties = d.substr(s[i + 6].first, s[i + 6].second);
-                extractProperties(floor.properties);
-                floor.floor = i % 8;
+                floor.properties = extractProperties(d.substr(s[i + 6].first, s[i + 6].second));
+                floor.floor = ++floorNumber;
                 floors.push_back(floor);
             }
             level.floors = std::move(floors);
@@ -197,15 +201,15 @@ std::optional<CYLevel> parseFile(const char* fileName) {
             for (size_t i = 0; i < s.size() - 1; i += 3) {
                 auto fullData = getMatchSection(s[i + 2], d);
 
-                
-
                 CYObject object;
                 object.position     = extractPosition(getMatchSection(s[i], d));
-                object.properties   = d.substr( s[i + 1].first, s[i + 1].second);
+                //object.properties   = d.substr( s[i + 1].first, s[i + 1].second);
                 if (objectName == "board" || objectName == "portal") {
-                    extractPropertiesMessage(object.properties);
+                    auto properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));
+                    object.properties = properties;
                 } else {
-                    extractProperties(object.properties);
+                    auto properties = extractProperties(d.substr(s[i + 1].first, s[i + 1].second));
+                    object.properties = properties;
                 }
 
 

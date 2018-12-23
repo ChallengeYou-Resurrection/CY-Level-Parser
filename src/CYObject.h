@@ -20,7 +20,7 @@ struct Position {
  */
 struct CYObject {
     Position position; 
-    std::string properties;
+    std::vector<std::string> properties;
     uint8_t floor;
 };
 
@@ -29,7 +29,7 @@ struct CYFloor {
     Position vertexB;
     Position vertexC;
     Position vertexD;
-    std::string properties;
+    std::vector<std::string> properties;
     uint8_t floor;
 };
 
