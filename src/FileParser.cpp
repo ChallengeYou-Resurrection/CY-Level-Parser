@@ -49,28 +49,12 @@ namespace {
 
     //Extracts the properties from a string which does not contain a message
     std::vector<std::string> extractProperties(const std::string& properties) {
-        std::cout << properties << std::endl;
-        
-        auto propertyList = split(properties, ',', true, '(', ')');
-
-        for (const auto& p : propertyList) {
-            std::cout << "\tProperty:" << p << '\n';
-        }
-        std::cout << std::endl;
-        return propertyList;
+        return split(properties, ',', true, '(', ')');
     }
 
     //Extracts the properties from a string which contains a message
     std::vector<std::string> extractPropertiesMessage(const std::string& properties) {
-        std::cout << properties << std::endl;
-        
-        auto propertyList = split(properties, ',', true);
-
-        for (const auto& p : propertyList) {
-            std::cout << "\tProperty:" << p << '\n';
-        }
-        std::cout << std::endl;
-        return propertyList;
+        return split(properties, ',', true);
     }
 }
 
