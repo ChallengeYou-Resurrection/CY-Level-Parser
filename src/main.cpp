@@ -59,7 +59,6 @@ void writeLevel(const std::string& name, const CYLevel& level) {
 }
 
 std::optional<CYLevel> readFile(const std::string& name) {
-    //std::cout << "Parsing: " << name << '\n';
     return parseFile(name.c_str());
 }
 
@@ -72,9 +71,18 @@ void testLocal(const std::string& name) {
     }   
 }
 
+auto itr() {
+    return fs::directory_iterator("../../Games");
+}
+
 int main() {
-    auto itr = fs::directory_iterator("../../Games");
-    for (const auto& path : itr) {
+    const int percentIncrement = std::distance(itr(), fs::directory_iterator{}) / 100;
+    int count = 0;
+    int progress = 0;
+    for (const auto& path : itr()) {
+        if (++count % percentIncrement == 0) {
+            printf("Progress: %d\% [%d out of %d games converted]\n", ++progress, count, percentIncrement * 100);
+        }
         try {
             const std::string name = path.path().filename().string();
             auto level = readFile(path.path().c_str());
