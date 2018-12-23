@@ -47,7 +47,9 @@ size_t findIgnoreQuotes(const std::string& str, const std::string& search);
  * 
  * @param string The string to split
  * @param deliminator Character to split the string at
- * @param ignoreBegin
+ * @param shouldIgnore Whether the function should ignore the deliminator between certain chars
+ * @param ignoreBegin If the function should ignore, then this is the char to begin the deliminator ignoring
+ * @param ignoreEnd If the function shouldIgnore, then this is the char to end the deliminator ignoring
  * @return std::vector<std::string> The tokens
  */
 template<typename Iterable>
