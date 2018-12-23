@@ -42,6 +42,30 @@ namespace {
     std::string_view getMatchSection(const BracketMatch& match, const std::string& data) {
         return std::string_view(data.data() + match.first, match.second);
     }
+
+    std::vector<std::string> extractProperties(const std::string& properties) {
+        std::cout << properties << std::endl;
+        
+        auto propertyList = split(properties, ',', true, '(', ')');
+
+        for (const auto& p : propertyList) {
+            std::cout << "\tProperty:" << p << '\n';
+        }
+        std::cout << std::endl;
+        return propertyList;
+    }
+
+    std::vector<std::string> extractPropertiesMessage(const std::string& properties) {
+        std::cout << properties << std::endl;
+        
+        auto propertyList = split(properties, ',', true);
+
+        for (const auto& p : propertyList) {
+            std::cout << "\tProperty:" << p << '\n';
+        }
+        std::cout << std::endl;
+        return propertyList;
+    }
 }
 
 std::vector<Error> errors;
@@ -147,6 +171,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
                 floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
                 floor.properties = d.substr(s[i + 6].first, s[i + 6].second);
+                extractProperties(floor.properties);
                 floor.floor = i % 8;
                 floors.push_back(floor);
             }
@@ -172,6 +197,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 wall.beginPoint = {xBegin,              zBegin};
                 wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
                 wall.properties = properties;
+                extractProperties(wall.properties);
                 wall.floor      = std::stoi(tokens.back());
                 walls.push_back(wall);
             }
@@ -182,9 +208,18 @@ std::optional<CYLevel> parseFile(const char* fileName) {
             for (size_t i = 0; i < s.size() - 1; i += 3) {
                 auto fullData = getMatchSection(s[i + 2], d);
 
+                
+
                 CYObject object;
                 object.position     = extractPosition(getMatchSection(s[i], d));
                 object.properties   = d.substr( s[i + 1].first, s[i + 1].second);
+                if (objectName == "board" || objectName == "portal") {
+                    extractPropertiesMessage(object.properties);
+                } else {
+                    extractProperties(object.properties);
+                }
+
+
                 object.floor        = std::stoi(split(fullData, ',').back());
                 objects.push_back(object);
             }
