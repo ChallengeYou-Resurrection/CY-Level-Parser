@@ -226,7 +226,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
 
                 objects.push_back(object);
             }
-            level.objects.emplace(std::string(objectName.data()), std::move(objects));
+            if (!(objectName == "backmusic" || objectName == "weather" || objectName == "theme")) {
+                level.objects.emplace(std::string(objectName.data()), std::move(objects));
+            }
         }
     }
 
