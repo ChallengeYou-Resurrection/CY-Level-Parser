@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 
 //This is tempory for testing, will be changed later
 void writeLevel(const std::string& name, const CYLevel& level) {
-    std::ofstream outfile("../../sample_out/" + name + ".out");
+    std::ofstream outfile("../../out/" + name + ".out");
     outfile << "Name:    "  << level.name           << '\n' 
             << "Author:  "  << level.creator        << '\n' 
             << "Version: "  << level.version        << '\n'
@@ -73,7 +73,7 @@ void testLocal(const std::string& name) {
 }
 
 int main() {
-    auto itr = fs::directory_iterator("../../sample");
+    auto itr = fs::directory_iterator("../../Games");
     for (const auto& path : itr) {
         try {
             const std::string name = path.path().filename().string();

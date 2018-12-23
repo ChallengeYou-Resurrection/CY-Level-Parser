@@ -38,7 +38,7 @@ void CYObject::verifyPropertyCount(const std::string& name) {
     else if (name == "pillar") {
         switch (propCount) {
             case 1:
-                addFrontProp(properties);
+                addBackProp(properties);
                 addBackProp(properties);
                 addBackProp(properties);
                 break;
