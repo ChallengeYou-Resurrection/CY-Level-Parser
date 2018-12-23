@@ -36,7 +36,7 @@ struct CYFloor {
 struct CYWall {
     Position beginPoint;
     Position endPoint;
-    std::string properties;
+    std::vector<std::string> properties;
     uint8_t floor;
 };
 

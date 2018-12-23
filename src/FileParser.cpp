@@ -189,8 +189,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 CYWall wall;
                 wall.beginPoint = {xBegin,              zBegin};
                 wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
-                wall.properties = properties;
-                extractProperties(wall.properties);
+                wall.properties = extractProperties(d.substr(s[i].first, s[i].second));//   properties);
                 wall.floor      = std::stoi(tokens.back());
                 walls.push_back(wall);
             }
@@ -205,11 +204,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 object.position     = extractPosition(getMatchSection(s[i], d));
                 //object.properties   = d.substr( s[i + 1].first, s[i + 1].second);
                 if (objectName == "board" || objectName == "portal") {
-                    auto properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));
-                    object.properties = properties;
+                    object.properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));;
                 } else {
-                    auto properties = extractProperties(d.substr(s[i + 1].first, s[i + 1].second));
-                    object.properties = properties;
+                    object.properties = extractProperties(d.substr(s[i + 1].first, s[i + 1].second));;
                 }
 
 

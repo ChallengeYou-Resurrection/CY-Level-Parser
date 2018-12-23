@@ -33,8 +33,12 @@ void writeLevel(const std::string& name, const CYLevel& level) {
     for (const auto& wall : level.walls) {
         outfile << "\tBegin:      " << wall.beginPoint.x    << " " << wall.beginPoint.z << '\n'
                 << "\tEnd:        " << wall.endPoint.x      << " " << wall.endPoint.z   << '\n'
-                << "\tProperties: " << wall.properties      << '\n'
-                << "\tFloor:      " << (int)wall.floor      << "\n\n";
+                << "\tFloor:      " << (int)wall.floor      << '\n'
+                << "\tProperties: ";
+        for (const auto& p : wall.properties) {
+            outfile << p << ' ';
+        }
+        outfile << "\n\n";               
     }
     
     for (const auto& cyObject : level.objects) {
