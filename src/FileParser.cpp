@@ -23,7 +23,9 @@ namespace {
         std::string name;
         std::string reason;
     };
+    std::vector<Error> errors;
 
+    //Get the Metadata Attributes from the header of a level file
     std::string getMetadataAttribute(
         const std::string& name, const std::string& token, bool isString) {
         return token.substr(
@@ -32,6 +34,7 @@ namespace {
         );
     }
 
+    //Extracts a position from a string
     Position extractPosition(const std::string_view& v) {
         auto pos = split(v, ',');
         auto x = std::stoi(pos[0]);
@@ -39,10 +42,12 @@ namespace {
         return {x, z};
     }
 
+    //Gets a section of the data string between two [ ] as defined by `match` parameter
     std::string_view getMatchSection(const BracketMatch& match, const std::string& data) {
         return std::string_view(data.data() + match.first, match.second);
     }
 
+    //Extracts the properties from a string which does not contain a message
     std::vector<std::string> extractProperties(const std::string& properties) {
         std::cout << properties << std::endl;
         
@@ -55,6 +60,7 @@ namespace {
         return propertyList;
     }
 
+    //Extracts the properties from a string which contains a message
     std::vector<std::string> extractPropertiesMessage(const std::string& properties) {
         std::cout << properties << std::endl;
         
@@ -67,8 +73,6 @@ namespace {
         return propertyList;
     }
 }
-
-std::vector<Error> errors;
 
 std::optional<CYLevel> parseFile(const char* fileName) {
     CYLevel level;
@@ -135,6 +139,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
     for (const auto& tokenPair : tokens) {
         const auto& objectName = tokenPair.first;
         const auto& data       = tokenPair.second;
+
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
         std::stack<size_t> unmatchedIndices;
