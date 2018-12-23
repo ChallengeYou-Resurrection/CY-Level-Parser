@@ -43,12 +43,12 @@ namespace {
     }
 
     //Gets a section of the data string between two [ ] as defined by `match` parameter
-    std::string_view getMatchSection(const BracketMatch& match, const std::string& data) {
+    std::string_view getMatchSection(const BracketMatch& match, const std::string_view& data) {
         return std::string_view(data.data() + match.first, match.second);
     }
 
     //Extracts the properties from a string which does not contain a message
-    std::vector<std::string> extractProperties(const std::string& properties) {
+    std::vector<std::string> extractProperties(const std::string_view& properties) {
         auto propertyList = split(properties, ',', true, '(', ')');
         for (auto& p : propertyList) {
             removeFrom(p, {' ', '[', ']'});
@@ -57,7 +57,7 @@ namespace {
     }
 
     //Extracts the properties from a string which contains a message
-    std::vector<std::string> extractPropertiesMessage(const std::string& properties) {
+    std::vector<std::string> extractPropertiesMessage(const std::string_view& properties) {
         return split(properties, ',', true);
     }
 }
@@ -96,7 +96,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
     }
 
     //@TODO Combine with function in loop below
-    std::vector<std::pair<std::string, std::string>> tokens;
+    std::vector<std::pair<std::string, std::string_view>> tokens;
     bool isInsideString = false;
     std::stack<size_t> unmatchedIndices;
     std::string name;
@@ -115,7 +115,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
             if (unmatchedIndices.empty()) {
                 removeFrom(name, {',', '#', ':', '[', '\"', ' '});
                 std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-                tokens.emplace_back(std::move(name), objects.substr(begin, length + 1));
+                tokens.emplace_back(std::move(name), std::string_view(objects.c_str() + begin, length + 1));
             }
         }
         else if (c == '\"') {
@@ -164,7 +164,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 floor.vertexB = extractPosition(getMatchSection(s[i + 1], d));
                 floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
                 floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
-                floor.properties = extractProperties(d.substr(s[i + 6].first, s[i + 6].second));
+                floor.properties = extractProperties(std::string_view(d.data() + s[i+6].first, s[i+6].second));
                 floor.floor = ++floorNumber;
                 floors.push_back(floor);
             }
