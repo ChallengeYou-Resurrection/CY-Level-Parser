@@ -190,6 +190,8 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
                 wall.properties = extractProperties(d.substr(s[i].first, s[i].second));//   properties);
                 wall.floor      = std::stoi(tokens.back());
+                wall.verifyPropertyCount();
+
                 walls.push_back(wall);
             }
             level.walls = std::move(walls);
@@ -200,8 +202,6 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 auto fullData = getMatchSection(s[i + 2], d);
 
                 CYObject object;
-                object.position     = extractPosition(getMatchSection(s[i], d));
-                //object.properties   = d.substr( s[i + 1].first, s[i + 1].second);
                 if (objectName == "board" || objectName == "portal") {
                     object.properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));;
                 } else {
@@ -220,11 +220,10 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     level.theme = std::stoi(object.properties[0]);
                     continue;
                 }
-                
+                object.position = extractPosition(getMatchSection(s[i], d));
+                object.floor = std::stoi(split(fullData, ',').back());
                 object.verifyPropertyCount(objectName);
 
-
-                object.floor = std::stoi(split(fullData, ',').back());
                 objects.push_back(object);
             }
             level.objects.emplace(std::string(objectName.data()), std::move(objects));

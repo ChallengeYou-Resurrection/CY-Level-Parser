@@ -32,6 +32,7 @@ void CYObject::verifyPropertyCount(const std::string& name) {
         switch (propCount) {
             case 2:
                 addBackProp(properties);
+                break;
         }
     }
     else if (name == "pillar") {
@@ -47,6 +48,15 @@ void CYObject::verifyPropertyCount(const std::string& name) {
         switch(propCount) {
             case 3:
                 addBackProp(properties);
+                break;
         }
+    }
+}
+
+void CYWall::verifyPropertyCount() {
+    switch (properties.size()) {
+        case 2:
+            addBackProp(properties);
+            break;
     }
 }

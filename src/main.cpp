@@ -13,7 +13,10 @@ void writeLevel(const std::string& name, const CYLevel& level) {
     outfile << "Name:    "  << level.name           << '\n' 
             << "Author:  "  << level.creator        << '\n' 
             << "Version: "  << level.version        << '\n'
-            << "Floors:  "  << level.numFloors      << '\n';
+            << "Floors:  "  << level.numFloors      << '\n'
+            << "Theme:   "  << level.theme          << '\n'
+            << "Music:   "  << level.backmusic      << '\n'
+            << "Weather: "  << level.weather        << '\n';
 
     outfile << "Floors\n";
     for (const auto& floor : level.floors) {
@@ -56,7 +59,7 @@ void writeLevel(const std::string& name, const CYLevel& level) {
 }
 
 std::optional<CYLevel> readFile(const std::string& name) {
-    std::cout << "Parsing: " << name << '\n';
+    //std::cout << "Parsing: " << name << '\n';
     return parseFile(name.c_str());
 }
 
