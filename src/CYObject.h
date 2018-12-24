@@ -35,6 +35,7 @@ enum class ObjectID : uint8_t {
     Music       = 250,
     Weather     = 251,
     Theme       = 252,
+    Unknown     = 253,
 };
 
 /**
@@ -77,7 +78,7 @@ struct CYWall {
 };
 
 //@TODO Change back to 
-using CYObjectMap = std::map<std::string, std::vector<CYObject>>;
+using CYObjectMap = std::map<ObjectID, std::vector<CYObject>>;
 struct CYLevel {
     std::string name;
     std::string creator;

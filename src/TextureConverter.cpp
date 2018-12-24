@@ -74,6 +74,7 @@ namespace {
     }
 }
 
+///@TODO Replace with switch case for ObjectID
 bool hasTexture(const std::string& texture) {
     static const std::unordered_set<std::string> objectsWithTextures = {
         "walls",

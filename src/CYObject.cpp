@@ -64,6 +64,9 @@ void CYObject::verifyPropertyCount(ObjectID id) {
                     break;
             }
             break;
+
+        default:
+            break;
     }
 }
 
@@ -105,13 +108,8 @@ ObjectID stringToObjectID(const std::string& objectName) {
 
         {"backmusic",   ObjectID::Music         },
         {"weather",     ObjectID::Weather       },
-        {"Theme",       ObjectID::Theme         },
+        {"theme",       ObjectID::Theme         },
+        {"flight",      ObjectID::Unknown       },
     };
-    try {
-        return objects.at(objectName);
-    }
-    catch(std::out_of_range& e) {
-        std::cout << "Cannot find object in map: " << objectName << '\n';
-        exit(-1);
-    }
+    return objects.at(objectName);
 }

@@ -125,9 +125,13 @@ std::optional<CYLevel> parseFile(const char* fileName) {
 
     //Extraction of all the data objcts
     for (const auto& tokenPair : tokens) {
-        const auto& objectName = tokenPair.first;
-        const auto& data       = tokenPair.second;
+        const auto  objId   = stringToObjectID(tokenPair.first);
+        const auto& data    = tokenPair.second;
 
+        if (objId == ObjectID::Unknown) {
+            continue;
+        }
+        
         //Match the square brackets [ .. ]
         std::vector<BracketMatch> sections;
         std::stack<size_t> unmatchedIndices;
@@ -154,85 +158,108 @@ std::optional<CYLevel> parseFile(const char* fileName) {
         //Walls and floors have a special format, everything else follows the same format
         //[[x, y], [properties], floor]
         const auto& s = sections;
-        const auto& d = data;    
-        if (objectName == "floor") {
-            std::vector<CYFloor> floors;
-            uint8_t floorNumber = 0;
-            for (size_t i = 0; i < s.size() - 1; i += 8) {
-                CYFloor floor;
-                floor.vertexA = extractPosition(getMatchSection(s[i    ], d));
-                floor.vertexB = extractPosition(getMatchSection(s[i + 1], d));
-                floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
-                floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
-                floor.properties = extractProperties(d.substr(s[i + 6].first, s[i + 6].second));
-                floor.floor = ++floorNumber;
-                floors.push_back(floor);
-            }
-            level.floors = std::move(floors);
-        }
-        else if (objectName == "walls") {
-            std::vector<CYWall> walls;
-            for (size_t i = 0; i < s.size() - 1; i += 2) {
-                if (data.find("<Void>") != std::string::npos) {
-                    errors.emplace_back(fileName, "Wall contains '<Void>'");
-                    return {};
+        const auto& d = data;  
+        switch(objId) {
+            case ObjectID::Floor:{
+                std::vector<CYFloor> floors;
+                uint8_t floorNumber = 0;
+                for (size_t i = 0; i < s.size() - 1; i += 8) {
+                    CYFloor floor;
+                    floor.vertexA = extractPosition(getMatchSection(s[i    ], d));
+                    floor.vertexB = extractPosition(getMatchSection(s[i + 1], d));
+                    floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
+                    floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
+                    floor.properties = extractProperties(d.substr(s[i + 6].first, s[i + 6].second));
+                    floor.floor = ++floorNumber;
+                    floors.push_back(floor);
                 }
-                auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
+                level.floors = std::move(floors);
+            }break;
 
-                int xOffset = std::stoi(tokens[0]);
-                int zOffset = std::stoi(tokens[1]);
+            case ObjectID::Wall:{
+                std::vector<CYWall> walls;
+                for (size_t i = 0; i < s.size() - 1; i += 2) {
+                    if (data.find("<Void>") != std::string::npos) {
+                        errors.emplace_back(fileName, "Wall contains '<Void>'");
+                        return {};
+                    }
+                    auto tokens = split(d.substr(s[i + 1].first, s[i + 1].second), ',');
 
-                int xBegin  = std::stoi(tokens[2]);
-                int zBegin  = std::stoi(tokens[3]);
+                    int xOffset = std::stoi(tokens[0]);
+                    int zOffset = std::stoi(tokens[1]);
 
-                auto props = extractProperties(d.substr(s[i].first, s[i].second));
-                props[0] = std::to_string(convertTexture(objectName, props[0]));
-                props[1] = std::to_string(convertTexture(objectName, props[1]));
+                    int xBegin  = std::stoi(tokens[2]);
+                    int zBegin  = std::stoi(tokens[3]);
 
-                CYWall wall;
-                wall.beginPoint = {xBegin,              zBegin};
-                wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
-                wall.properties = props;
-                wall.floor      = std::stoi(tokens.back());
-                wall.verifyPropertyCount();
+                    auto props = extractProperties(d.substr(s[i].first, s[i].second));
+                    props[0] = std::to_string(convertTexture(objId, props[0]));
+                    props[1] = std::to_string(convertTexture(objId, props[1]));
 
-                walls.push_back(wall);
-            }
-            level.walls = std::move(walls);
-        }
-        else {    
-            std::vector<CYObject> objects; 
-            for (size_t i = 0; i < s.size() - 1; i += 3) {
-                auto fullData = getMatchSection(s[i + 2], d);
+                    CYWall wall;
+                    wall.beginPoint = {xBegin,              zBegin};
+                    wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
+                    wall.properties = props;
+                    wall.floor      = std::stoi(tokens.back());
+                    wall.verifyPropertyCount();
 
-                CYObject object;
-                if (objectName == "board" || objectName == "portal") {
-                    object.properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));;
-                } else {
-                    object.properties = extractProperties(d.substr(s[i + 1].first, s[i + 1].second));;
+                    walls.push_back(wall);
                 }
+                level.walls = std::move(walls);
+            }break;
 
-                if (objectName == "backmusic") {
-                    level.backmusic = std::stoi(object.properties[0]);
-                    continue;
-                }
-                else if (objectName == "weather") {
-                    level.weather = std::stoi(object.properties[0]);
-                    continue;
-                }
-                else if (objectName == "theme") {
-                    level.theme = std::stoi(object.properties[0]);
-                    continue;
-                }
-                object.position = extractPosition(getMatchSection(s[i], d));
-                object.floor = std::stoi(split(fullData, ',').back());
-                object.verifyPropertyCount(objectName);
+            default: {
+                std::vector<CYObject> objects; 
+                for (size_t i = 0; i < s.size() - 1; i += 3) {
+                    auto fullData = getMatchSection(s[i + 2], d);
 
-                objects.push_back(object);
-            }
-            if (!(objectName == "backmusic" || objectName == "weather" || objectName == "theme")) {
-                level.objects.emplace(std::string(objectName.data()), std::move(objects));
-            }
+                    CYObject object;
+                    switch (objId) {
+                        case ObjectID::Message:
+                        case ObjectID::Portal:
+                            object.properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));
+                            break;
+
+                        default: 
+                            object.properties = extractProperties(d.substr(s[i + 1].first, s[i + 1].second));
+                            break;
+                    }
+
+                    //Remove backmusic, weather, and theme, and instead use them as metadata for the level
+                    switch(objId) {
+                        case ObjectID::Music:
+                            level.backmusic = std::stoi(object.properties[0]);
+                            continue;
+                        
+                        case ObjectID::Weather:
+                            level.weather = std::stoi(object.properties[0]);
+                            continue;
+
+                        case ObjectID::Theme:
+                            level.theme = std::stoi(object.properties[0]);
+                            continue;
+
+                        default:
+                            break;
+                    }
+
+                    object.position = extractPosition(getMatchSection(s[i], d));
+                    object.floor = std::stoi(split(fullData, ',').back());
+                    object.verifyPropertyCount(objId);
+
+                    objects.push_back(object);
+                }
+                switch (objId) {
+                    case ObjectID::Music:
+                    case ObjectID::Weather:
+                    case ObjectID::Theme:
+                        break;
+
+                    default:
+                        level.objects.emplace(objId, std::move(objects));
+                        break;
+
+                }
+            }break;
         }
     }
 
