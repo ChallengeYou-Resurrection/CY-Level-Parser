@@ -26,9 +26,9 @@ namespace benchmark {
                 start = C::now();
             }
 
-            void printElapsed() {
-                auto endTime = C::now();
-                std::cout << std::chrono::duration_cast<TimeUnit>(endTime - start).count() / 1000.0 << "ms" << '\n';
+            double getTime() {
+                return std::chrono::duration_cast<TimeUnit>(
+                    C::now() - start).count() / 1000.0;
             }
 
         private:
