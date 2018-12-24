@@ -1,5 +1,8 @@
 #include "CYObject.h"
 
+#include <unordered_map>
+#include <iostream>
+
 namespace {
     void addBackProp(std::vector<std::string>& propList) {
         propList.push_back("1");
@@ -10,46 +13,60 @@ namespace {
     }
 }
 
-void CYObject::verifyPropertyCount(const std::string& name) {
+void CYObject::verifyPropertyCount(ObjectID id) {
     int propCount = properties.size();
-    if (name == "plat") {
-        switch (propCount) {
-            case 1:
-                addFrontProp(properties);
-            case 2:
+
+    switch(id) {
+        case ObjectID::Platform:
+            switch(propCount) {
+                case 1:
+                    addFrontProp(properties);
+                case 2: //Fallthrough is intentional
+                    addBackProp(properties);
+            }
+            break;
+
+        case ObjectID::Diamond:
+        case ObjectID::Finish:
+        case ObjectID::Iceman:
+        case ObjectID::Ramp:
+            switch (propCount) {
+                case 1:
                 addBackProp(properties);
                 break;
-        }
-    }
-    else if (name == "diamond" || name == "finish" || name == "monster" || name == "ramp") {
-        switch (propCount) {
-            case 1:
-               addBackProp(properties);
-               break;
-        }
-    }
-    else if (name == "board" || name == "diaplat" || name == "door") {
-        switch (propCount) {
-            case 2:
-                addBackProp(properties);
-                break;
-        }
-    }
-    else if (name == "pillar") {
-        switch (propCount) {
-            case 1:
-                addBackProp(properties);
-                addBackProp(properties);
-                addBackProp(properties);
-                break;
-        }
-    }
-    else if (name == "triplat") {
-        switch(propCount) {
-            case 3:
-                addBackProp(properties);
-                break;
-        }
+            }
+            break;
+
+        case ObjectID::Message:
+        case ObjectID::DiaPlatform:
+        case ObjectID::Door:
+            switch (propCount) {
+                case 2:
+                    addBackProp(properties);
+                    break;
+            }
+            break;
+
+        case ObjectID::Pillar:
+            switch (propCount) {
+                case 1:
+                    addBackProp(properties);
+                    addBackProp(properties);
+                    addBackProp(properties);
+                    break;
+            }
+            break;
+
+        case ObjectID::TriPlatform:
+            switch(propCount) {
+                case 3:
+                    addBackProp(properties);
+                    break;
+            }
+            break;
+
+        default:
+            break;
     }
 }
 
@@ -59,4 +76,40 @@ void CYWall::verifyPropertyCount() {
             addBackProp(properties);
             break;
     }
+}
+
+ObjectID stringToObjectID(const std::string& objectName) {
+    const static std::unordered_map<std::string, ObjectID> objects {
+        {"walls",       ObjectID::Wall          },
+        {"floor",       ObjectID::Floor         },
+        {"plat",        ObjectID::Platform      },
+        {"triplat",     ObjectID::TriPlatform   },
+        {"diaplat",     ObjectID::DiaPlatform   },
+        {"ramp",        ObjectID::Ramp          },
+        {"triwall",     ObjectID::TriPlatform   },
+        {"pillar",      ObjectID::Pillar        },
+        {"door",        ObjectID::Door          },
+        {"diamond",     ObjectID::Diamond       },
+        {"monster",     ObjectID::Iceman        },
+        {"chaser",      ObjectID::Chaser        },
+        {"hole",        ObjectID::Hole          },
+        {"begin",       ObjectID::Start         },
+        {"finish",      ObjectID::Finish        },
+        {"jetpack",     ObjectID::JetPack       },
+        {"fuel",        ObjectID::Fuel          },
+        {"shield",      ObjectID::Shield        },
+        {"slingshot",   ObjectID::Slingshot     },
+        {"crumbs",      ObjectID::Crumbs        },
+        {"teleport",    ObjectID::Teleport      },
+        {"key2",        ObjectID::Key           },
+        {"ladder",      ObjectID::Ladder        },
+        {"portal",      ObjectID::Portal        },
+        {"board",       ObjectID::Message       },
+
+        {"backmusic",   ObjectID::Music         },
+        {"weather",     ObjectID::Weather       },
+        {"theme",       ObjectID::Theme         },
+        {"flight",      ObjectID::Unknown       },
+    };
+    return objects.at(objectName);
 }
