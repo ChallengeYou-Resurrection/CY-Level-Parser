@@ -246,6 +246,14 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     object.floor = std::stoi(split(fullData, ',').back());
                     object.verifyPropertyCount(objId);
 
+                    if (hasTexture(objId)) {
+                        if (objId == ObjectID::Door) {
+                            object.properties[2] = std::to_string(convertTexture(objId, object.properties[2]));
+                        } else {
+                            object.properties[1] = std::to_string(convertTexture(objId, object.properties[1]));
+                        }
+                    }
+
                     objects.push_back(object);
                 }
                 switch (objId) {

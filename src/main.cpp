@@ -7,7 +7,7 @@
 
 namespace fs = std::filesystem;
 
-//#define USE_SAMPLE_GAMES 
+#define USE_SAMPLE_GAMES 
 #ifdef USE_SAMPLE_GAMES
     #define SINGLE_GAME
     #ifdef SINGLE_GAME

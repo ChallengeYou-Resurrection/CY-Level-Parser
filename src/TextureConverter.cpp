@@ -93,14 +93,27 @@ bool hasTexture(ObjectID id) {
 
 
 int32_t convertTexture(ObjectID object, const std::string& texture) {
-    const static std::unordered_map<ObjectID, ConvertFunction> converter {
-        {ObjectID::Wall,        &convertWallTexture       },
-        {ObjectID::Floor,       &convertFloorTexture      },
-        {ObjectID::Platform,    &convertPlatformTexture   },
-    };
-
     if (isColourTexture(texture)) {
         return colourToInt(texture);
     }
-    return converter.at(object)(std::stoi(texture));
+
+    switch(object) {
+        case ObjectID::Wall:
+        case ObjectID::Pillar:
+        case ObjectID::Door:
+        case ObjectID::TriWall:
+            return convertWallTexture(std::stoi(texture));
+
+        case ObjectID::Floor:
+        case ObjectID::Platform:
+        case ObjectID::TriPlatform:
+        case ObjectID::DiaPlatform:
+        case ObjectID::Ramp:
+            return convertFloorTexture(std::stoi(texture));
+
+        default:
+            std::cerr << "UNKNOWN OBEJCT";
+            return -1;
+    }
+
 }
