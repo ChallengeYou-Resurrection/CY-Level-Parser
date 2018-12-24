@@ -55,7 +55,7 @@ struct CYObject {
     std::vector<std::string> properties;
     uint8_t floor;
 
-    void verifyPropertyCount(const std::string& name);
+    void verifyPropertyCount(ObjectID id);
 };
 
 struct CYFloor {
