@@ -43,8 +43,12 @@ enum class ObjectID : uint8_t {
  * 
  */
 struct Position {
-    int x = 0;
+    int16_t x = 0;
     int z = 0;
+
+    int16_t serialize() {
+
+    }
 };
 
 /**

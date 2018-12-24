@@ -9,8 +9,11 @@ namespace {
     enum class PType : uint8_t {
         Position    = 0,
         Texture     = 1,
-        Q_Value     = 2,
+        QValue      = 2,
         Floor       = 3,
+        IsHidden    = 4,
+
+        Unknown     = 250,
     };
 
     template<typename WriteType, typename OrigType>
@@ -20,18 +23,19 @@ namespace {
     }
 
     void writeString(std::ofstream& outFile, const std::string& string) {
-        uint8_t size = (uint8_t)string.size();
+        auto size = (uint16_t)string.size();
+        writeNumber<uint16_t>(outFile, size);
         outFile.write(reinterpret_cast<const char*>(&size), sizeof(size));
         outFile.write(string.c_str(), string.size());
     }
 
     void writeObjectTypeHeader(std::ofstream& outFile, const std::initializer_list<PType>& format, ObjectID id, size_t numObjects) {
         writeNumber<uint8_t>(outFile, id);
-        writeNumber<uint8_t>(outFile, format.size());//format.size(), outFile);
+        writeNumber<uint8_t>(outFile, format.size());
         for (auto p : format) {
             writeNumber<uint8_t>(outFile, p);
         }
-        std::cout << "Number of objects: " << numObjects << std::endl;
+        
         writeNumber<uint32_t>(outFile, numObjects);
     }
 
@@ -51,18 +55,30 @@ namespace {
     void writeWalls(std::ofstream& outFile, const std::vector<CYWall>& walls) {
         writeObjectTypeHeader(
             outFile, 
-            {PType::Position, PType::Position, PType::Texture, PType::Texture, PType::Floor, PType::Q_Value}, 
+            {PType::Texture, PType::Texture, PType::QValue}, 
             ObjectID::Wall, walls.size());
 
         for (const auto& wall : walls) {
             writePosition(outFile, wall.beginPoint);
             writePosition(outFile, wall.endPoint);
+            writeNumber<uint8_t>(outFile, wall.floor);
             writeNumber<uint32_t>(outFile, std::stoi(wall.properties[0]));
             writeNumber<uint32_t>(outFile, std::stoi(wall.properties[1]));
-            writeNumber<uint8_t>(outFile, wall.floor);
             writeNumber<uint8_t>(outFile, std::stoi(wall.properties[2]));
         }
+    }
 
+    void writeFloors(std::ofstream& outFile, const std::vector<CYFloor>& floors) {
+        writeObjectTypeHeader(
+            outFile,
+            {PType::Texture, PType::IsHidden, PType::Texture},
+            ObjectID::Floor, floors.size());
+        for (const auto& floor : floors) {
+            writePosition(outFile, floor.vertexA);
+            writePosition(outFile, floor.vertexA);
+            writePosition(outFile, floor.vertexA);
+            writePosition(outFile, floor.vertexA);
+        }
     }
 }
 
@@ -70,6 +86,7 @@ namespace {
 void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     std::ofstream outfile(fileName, std::ofstream::binary);
 
+    writeNumber<uint16_t>(outfile, 1); //Version number
     writeString(outfile, level.name);
     writeString(outfile, level.creator);
     writeNumber<uint8_t>(outfile, std::stoi(level.numFloors));
@@ -78,4 +95,5 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     writeNumber<uint8_t>(outfile, level.weather);
 
     writeWalls(outfile, level.walls);
+    writeFloors(outfile, level.floors);
 }

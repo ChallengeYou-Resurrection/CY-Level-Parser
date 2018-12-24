@@ -53,7 +53,7 @@ namespace {
     }
 
     int32_t convertPlatformTexture(int texture) {
-        switch (texture) // WALLS
+        switch (texture)
         {
             case 1: return  TextureID::Grass;
             case 2: return  TextureID::Stucco;
