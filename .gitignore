@@ -16,10 +16,12 @@ Games/
 out/
 br
 brr
+*.zip
 
+#Test files
 sample/
+sample2/
 sample_out/
 sample_out_backup/
 sample_ext/
-
-*.zip
+test_out/
