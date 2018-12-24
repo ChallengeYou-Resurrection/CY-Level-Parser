@@ -1,5 +1,7 @@
 #include "CYObject.h"
 
+#include <unordered_map>
+
 namespace {
     void addBackProp(std::vector<std::string>& propList) {
         propList.push_back("1");
@@ -59,4 +61,34 @@ void CYWall::verifyPropertyCount() {
             addBackProp(properties);
             break;
     }
+}
+
+ObjectID stringToObjectID(const std::string& objectName) {
+    const static std::unordered_map<std::string, ObjectID> objects {
+        {"walls",       ObjectID::Wall          },
+        {"floor",       ObjectID::Floor         },
+        {"plat",        ObjectID::Platform      },
+        {"triplat",     ObjectID::TriPlatform   },
+        {"diaplat",     ObjectID::DiaPlatform   },
+        {"ramp",        ObjectID::Ramp          },
+        {"triwall",     ObjectID::TriPlatform   },
+        {"pillar",      ObjectID::Pillar        },
+        {"door",        ObjectID::Door          },
+        {"diamond",     ObjectID::Diamond       },
+        {"monster",     ObjectID::Iceman        },
+        {"chaser",      ObjectID::Chaser        },
+        {"hole",        ObjectID::Hole          },
+        {"begin",       ObjectID::Start         },
+        {"finish",      ObjectID::Finish        },
+        {"jetpack",     ObjectID::JetPack       },
+        {"fuel",        ObjectID::Fuel          },
+        {"shield",      ObjectID::Shield        },
+        {"slingshot",   ObjectID::Slingshot     },
+        {"crumbs",      ObjectID::Crumbs        },
+        {"teleport",    ObjectID::Teleport      },
+        {"key2",        ObjectID::Key           },
+        {"ladder",      ObjectID::Ladder        },
+        {"portal",      ObjectID::Portal        },
+    };
+    return objects.at(objectName);
 }

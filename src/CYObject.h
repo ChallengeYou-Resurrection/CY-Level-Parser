@@ -86,3 +86,5 @@ struct CYLevel {
     std::vector<CYFloor> floors;
     std::vector<CYWall> walls;
 };
+
+ObjectID stringToObjectID(const std::string& objectName);
