@@ -12,6 +12,7 @@ set(SOURCES
 	src/main.cpp
 	src/CYObject.cpp
 	src/FileParser.cpp
+	src/FileWriter.cpp
 	src/TextureConverter.cpp
 	src/Utilities.cpp
 )

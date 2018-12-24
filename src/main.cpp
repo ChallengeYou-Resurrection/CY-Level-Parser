@@ -1,6 +1,7 @@
 #include "FileParser.h"
 #include "Utilities.h"
 #include "Benchmark.h"
+#include "FileWriter.h"
 
 #include <fstream>
 #include <filesystem>
@@ -73,26 +74,6 @@ void writeLevel(const std::string& name, const CYLevel& level) {
     }
 }
 
-void writeUint8(uint8_t n, std::ofstream& outFile) {
-    outFile.write(reinterpret_cast<const char*>(&n), sizeof(n));
-}
-
-void writeString(const std::string& string, std::ofstream& outFile) {
-    uint8_t size = (uint8_t)string.size();
-    outFile.write(reinterpret_cast<const char*>(&size), sizeof(size));
-    outFile.write(string.c_str(), string.size());
-}
-
-void writeLevelBinary(const std::string& name, const CYLevel& level) {
-    std::ofstream outfile(OUT + name + ".cyb", std::ofstream::binary);
-    writeString(level.name, outfile);
-    writeString(level.creator, outfile);
-    writeUint8((uint8_t)std::stoi(level.numFloors), outfile);
-    writeUint8((uint8_t)level.backmusic, outfile);
-    writeUint8((uint8_t)level.theme, outfile);
-    writeUint8((uint8_t)level.weather, outfile); 
-}
-
 std::optional<CYLevel> readFile(const std::string& name) {
     return parseFile(name.c_str());
 }
@@ -131,7 +112,7 @@ int main() {
         const std::string name = path.path().filename().string();
         auto level = readFile(path.path().c_str());
         if (level) {
-            writeLevelBinary(name, *level);
+            writeLevelBinary(*level, OUT + name + ".cyb");
             writeLevel(name, *level);
         }   
     }
