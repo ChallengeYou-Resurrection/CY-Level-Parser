@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <stack>
 
-
+#include "TextureConverter.h"
 
 /**
  * @brief This pair defines a pair of matching square brackets
@@ -185,10 +185,14 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 int xBegin  = std::stoi(tokens[2]);
                 int zBegin  = std::stoi(tokens[3]);
 
+                auto props = extractProperties(d.substr(s[i].first, s[i].second));
+                props[0] = std::to_string(convertTexture(objectName, props[0]));
+                props[1] = std::to_string(convertTexture(objectName, props[1]));
+
                 CYWall wall;
                 wall.beginPoint = {xBegin,              zBegin};
                 wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
-                wall.properties = extractProperties(d.substr(s[i].first, s[i].second));//   properties);
+                wall.properties = props;
                 wall.floor      = std::stoi(tokens.back());
                 wall.verifyPropertyCount();
 
