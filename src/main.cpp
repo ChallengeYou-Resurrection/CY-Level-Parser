@@ -71,17 +71,22 @@ void testLocal(const std::string& name) {
     }   
 }
 
-auto itr() {
+auto getGamesDirectoryItr() {
     return fs::directory_iterator("../../Games");
 }
 
 int main() {
-    const int percentIncrement = std::distance(itr(), fs::directory_iterator{}) / 100;
+    benchmark::Timer<> timer;
+    const int percentIncrement = std::distance(getGamesDirectoryItr(), fs::directory_iterator{}) / 100;
     int count = 0;
     int progress = 0;
-    for (const auto& path : itr()) {
+    std::cout << "Total files: " << percentIncrement * 100 << std::endl;
+    timer.reset();
+    for (const auto& path : getGamesDirectoryItr()) {
         if (++count % percentIncrement == 0) {
-            printf("Progress: %d\% [%d out of %d games converted]\n", ++progress, count, percentIncrement * 100);
+            printf("Progress: %d%% [%d out of %d games converted] ", ++progress, count, percentIncrement * 100);
+            printf("[Time: %fms]\n", timer.getTime());
+            timer.reset();
         }
         try {
             const std::string name = path.path().filename().string();
