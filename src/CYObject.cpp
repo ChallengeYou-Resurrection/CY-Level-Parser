@@ -89,6 +89,7 @@ ObjectID stringToObjectID(const std::string& objectName) {
         {"key2",        ObjectID::Key           },
         {"ladder",      ObjectID::Ladder        },
         {"portal",      ObjectID::Portal        },
+        {"board",       ObjectID::Message       },
     };
     return objects.at(objectName);
 }

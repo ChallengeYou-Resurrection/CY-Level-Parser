@@ -30,6 +30,7 @@ enum class ObjectID : uint8_t {
     Key         = 22,
     Ladder      = 23,
     Portal      = 24,    
+    Message     = 25
 };
 
 /**
