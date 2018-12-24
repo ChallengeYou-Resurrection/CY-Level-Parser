@@ -20,8 +20,10 @@ brr
 
 #Test files
 sample/
-sample2/
 sample_out/
 sample_out_backup/
 sample_ext/
 test_out/
+
+single/
+single_out/
