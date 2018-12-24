@@ -1,6 +1,7 @@
 #include "CYObject.h"
 
 #include <unordered_map>
+#include <iostream>
 
 namespace {
     void addBackProp(std::vector<std::string>& propList) {
@@ -90,6 +91,16 @@ ObjectID stringToObjectID(const std::string& objectName) {
         {"ladder",      ObjectID::Ladder        },
         {"portal",      ObjectID::Portal        },
         {"board",       ObjectID::Message       },
+
+        {"backmusic",   ObjectID::Music         },
+        {"weather",     ObjectID::Weather       },
+        {"Theme",       ObjectID::Theme         },
     };
-    return objects.at(objectName);
+    try {
+        return objects.at(objectName);
+    }
+    catch(std::out_of_range& e) {
+        std::cout << "Cannot find object in map: " << objectName << '\n';
+        exit(-1);
+    }
 }
