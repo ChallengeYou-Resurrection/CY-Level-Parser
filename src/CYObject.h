@@ -6,36 +6,36 @@
 #include <vector>
 
 enum class ObjectID : uint8_t {
-    Wall        = 0,
-    Floor       = 1,
-    Platform    = 2,
-    TriPlatform = 3,
-    DiaPlatform = 4,
-    Ramp        = 5,
-    TriWall     = 6,
-    Pillar      = 7,
-    Door        = 8,
-    Diamond     = 9,
-    Iceman      = 10,
-    Chaser      = 11,
-    Hole        = 12,
-    Start       = 13,
-    Finish      = 14,
-    JetPack     = 15,
-    Fuel        = 16,
-    Shield      = 17,
-    Slingshot   = 19,
-    Crumbs      = 20,
-    Teleport    = 21,
-    Key         = 22,
-    Ladder      = 23,
-    Portal      = 24,    
-    Message     = 25,
-
-    Music       = 250,
-    Weather     = 251,
-    Theme       = 252,
-    Unknown     = 253,
+    Chaser		    = 0,
+    Crumbs		    = 1,
+    DiaPlatform		= 2,
+    Diamond		    = 3,
+    Door		    = 4,
+    Finish		    = 5,
+    Floor		    = 6,
+    Fuel		    = 7,
+    Hole		    = 8,
+    Iceman		    = 9,
+    JetPack		    = 10,
+    Key		        = 11,
+    Ladder		    = 12,
+    Message		    = 13,
+    Pillar		    = 14,
+    Platform	    = 15,
+    Portal		    = 16,
+    Ramp		    = 17,
+    Shield		    = 18,
+    Slingshot	    = 19,
+    Start		    = 20,
+    Teleport	    = 21,
+    TriPlatform 	= 22,
+    TriWall		    = 23,
+    Wall		    = 24,
+    
+    Theme		    = 250,
+    Weather		    = 251,
+    Music		    = 252,
+    Unknown		    = 253,
 };
 
 /**
@@ -77,8 +77,7 @@ struct CYWall {
     void verifyPropertyCount();
 };
 
-//@TODO Change back to 
-using CYObjectMap = std::map<ObjectID, std::vector<CYObject>>;
+using CYObjectMap = std::unordered_map<ObjectID, std::vector<CYObject>>;
 struct CYLevel {
     std::string name;
     std::string creator;

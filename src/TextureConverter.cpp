@@ -75,19 +75,20 @@ namespace {
 }
 
 ///@TODO Replace with switch case for ObjectID
-bool hasTexture(const std::string& texture) {
-    static const std::unordered_set<std::string> objectsWithTextures = {
-        "walls",
-        "floor",
-        "plat",
-        "triplat",
-        "diaplat",
-        "ramp",
-        "triwall",
-        "pillar",
-        "door",
-    };
-    return objectsWithTextures.find(texture) != objectsWithTextures.end();
+bool hasTexture(ObjectID id) {
+    switch(id) {
+        case ObjectID::Platform:
+        case ObjectID::TriPlatform:
+        case ObjectID::DiaPlatform:
+        case ObjectID::Ramp:
+        case ObjectID::TriWall:
+        case ObjectID::Pillar:
+        case ObjectID::Door:
+            return true;
+
+        default:
+            return false;
+    }
 }
 
 
