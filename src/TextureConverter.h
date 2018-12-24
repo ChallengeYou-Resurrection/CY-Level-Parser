@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "CYObject.h"
 
 //This is not an enum class because of colour textures are represented using 24bits for RGB
 //Layout for colours: 00000000RRRRRRRRGGGGGGGGBBBBBBBB
@@ -28,5 +29,5 @@ namespace TextureID {
     };
 }
 
-bool hasTexture(const std::string& texture);
-int convertTexture(const std::string& object, const std::string& texture);
+bool hasTexture     (const std::string& texture);
+int convertTexture  (ObjectID object, const std::string& texture);

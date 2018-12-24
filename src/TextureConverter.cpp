@@ -14,7 +14,7 @@ namespace {
         return texture.find("color") != std::string::npos;
     }
 
-    int32_t getColourInteger(const std::string& texture) {
+    int32_t colourToInt(const std::string& texture) {
         auto colours = split(texture, ',');
         colours[0] = colours[0].substr(6);
         colours[2].pop_back();
@@ -90,15 +90,15 @@ bool hasTexture(const std::string& texture) {
 }
 
 
-int32_t convertTexture(const std::string& object, const std::string& texture) {
-    const static std::unordered_map<std::string, ConvertFunction> converter {
-        {"walls", &convertWallTexture       },
-        {"floor", &convertFloorTexture      },
-        {"plat", &convertPlatformTexture   },
+int32_t convertTexture(ObjectID object, const std::string& texture) {
+    const static std::unordered_map<ObjectID, ConvertFunction> converter {
+        {ObjectID::Wall,        &convertWallTexture       },
+        {ObjectID::Floor,       &convertFloorTexture      },
+        {ObjectID::Platform,    &convertPlatformTexture   },
     };
 
     if (isColourTexture(texture)) {
-        return getColourInteger(texture);
+        return colourToInt(texture);
     }
     return converter.at(object)(std::stoi(texture));
 }
