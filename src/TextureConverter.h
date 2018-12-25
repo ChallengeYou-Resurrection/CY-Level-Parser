@@ -30,4 +30,4 @@ namespace TextureID {
 }
 
 bool hasTexture     (ObjectID id);
-int convertTexture  (ObjectID object, const std::string& texture);
+uint32_t convertTexture  (ObjectID object, const std::string& texture);
