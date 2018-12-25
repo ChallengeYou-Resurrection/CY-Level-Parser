@@ -254,6 +254,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                         } else {
                             object.properties[1] = std::to_string(convertTexture(objId, object.properties[1]));
                         }
+                        if (objId == ObjectID::DiaPlatform) {
+                            std::cout << object.properties[1] << '\n';
+                        }
                     }
 
                     objects.push_back(object);
