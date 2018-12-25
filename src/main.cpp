@@ -60,9 +60,9 @@ void writeLevel(const std::string& name, const CYLevel& level) {
         outfile << "\n\n";               
     }
     
-    for (const auto& cyObject : level.objects) {
-        outfile << "Object ID: " << (int)cyObject.first << '\n';
-        for (const auto& obj : cyObject.second) {
+    for (size_t i = 0; i < level.objects.size(); i++) {
+        outfile << "Object ID: " << i << '\n';
+        for (const auto& obj : level.objects[i]) {
             outfile << "\tPosition:   " << obj.position.x << " " << obj.position.z << '\n'
                     << "\tFloor:      " << (int)obj.floor << '\n'
                     << "\tProperties: ";

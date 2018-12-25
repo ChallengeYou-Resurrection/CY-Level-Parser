@@ -268,7 +268,7 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                         break;
 
                     default:
-                        level.objects.emplace(objId, std::move(objects));
+                        level.objects[(int)objId] = std::move(objects);
                         break;
 
                 }

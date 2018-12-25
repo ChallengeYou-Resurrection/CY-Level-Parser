@@ -33,6 +33,7 @@ enum class ObjectID : uint8_t {
     TriPlatform 	= 22,
     TriWall		    = 23,
     Wall		    = 24,
+    NUM_OBJECTS     = 25,
     
     Theme		    = 250,
     Weather		    = 251,
@@ -89,7 +90,7 @@ struct CYObject {
     void verifyPropertyCount(ObjectID id);
 };
 
-using CYObjectMap = std::unordered_map<ObjectID, std::vector<CYObject>>;
+using CYObjectMap = std::array<std::vector<CYObject>, (int)ObjectID::NUM_OBJECTS>;
 struct CYLevel {
     std::string name;
     std::string creator;
@@ -104,7 +105,7 @@ struct CYLevel {
     std::vector<CYWall> walls;
 
     size_t numObjects(ObjectID id) const {
-        return objects.at(id).size();
+        return objects[(int)id].size();
     }
 };
 
