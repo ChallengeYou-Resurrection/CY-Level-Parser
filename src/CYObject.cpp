@@ -113,3 +113,23 @@ ObjectID stringToObjectID(const std::string& objectName) {
     };
     return objects.at(objectName);
 }
+
+void CYFloor::serialize(BinaryFileBuffer& buffer) const {
+    buffer  << vertexA << vertexB << vertexC << vertexD << floor << floor 
+            << (u32)std::stoi(properties[0]) 
+            << (u32)std::stoi(properties[1]) 
+            << (u8 )std::stoi(properties[2]);
+    
+}
+
+void CYWall::serialize(BinaryFileBuffer& buffer) const {
+    buffer  << beginPoint << endPoint << floor
+            << (u32)std::stoi(properties[0]) 
+            << (u32)std::stoi(properties[1]) 
+            << (u8 )std::stoi(properties[2]);
+    
+}
+
+void CYObject::serialize(BinaryFileBuffer& buffer) const {
+    
+}

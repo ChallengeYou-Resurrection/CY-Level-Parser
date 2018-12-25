@@ -54,6 +54,27 @@ struct Position {
     }
 };
 
+struct CYFloor {
+    Position vertexA;
+    Position vertexB;
+    Position vertexC;
+    Position vertexD;
+    uint8_t floor;
+    std::vector<std::string> properties;
+
+    void serialize(BinaryFileBuffer& buffer) const;
+};
+
+struct CYWall {
+    Position beginPoint;
+    Position endPoint;
+    std::vector<std::string> properties;
+    uint8_t floor;
+
+    void serialize(BinaryFileBuffer& buffer) const;
+    void verifyPropertyCount();
+};
+
 /**
  * @brief Represents a single CY Object
  * 
@@ -63,34 +84,8 @@ struct CYObject {
     std::vector<std::string> properties;
     uint8_t floor;
 
+    void serialize(BinaryFileBuffer& buffer) const;
     void verifyPropertyCount(ObjectID id);
-};
-
-struct CYFloor {
-    Position vertexA;
-    Position vertexB;
-    Position vertexC;
-    Position vertexD;
-    uint8_t floor;
-    std::vector<std::string> properties;
-};
-
-struct CYWall {
-    Position beginPoint;
-    Position endPoint;
-    std::vector<std::string> properties;
-    uint8_t floor;
-
-    template<typename Buffer>
-    void serialize(Buffer& buffer) const {
-        buffer  << beginPoint << endPoint << floor
-                << (u32)std::stoi(properties[0]) 
-                << (u32)std::stoi(properties[1]) 
-                << (u8 )std::stoi(properties[2]);
-        
-    }
-
-    void verifyPropertyCount();
 };
 
 using CYObjectMap = std::unordered_map<ObjectID, std::vector<CYObject>>;
