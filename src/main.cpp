@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 
 #define USE_SAMPLE_GAMES 
 #ifdef USE_SAMPLE_GAMES
-    //#define SINGLE_GAME
+    #define SINGLE_GAME
     #ifdef SINGLE_GAME
         #define DIR "../../single"
         #define OUT "../../single_out/"

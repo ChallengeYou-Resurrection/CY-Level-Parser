@@ -71,8 +71,8 @@ struct CYFloor {
     Position vertexB;
     Position vertexC;
     Position vertexD;
-    std::vector<std::string> properties;
     uint8_t floor;
+    std::vector<std::string> properties;
 };
 
 struct CYWall {
@@ -83,7 +83,7 @@ struct CYWall {
 
     template<typename Buffer>
     void serialize(Buffer& buffer) const {
-        buffer << beginPoint << endPoint << floor
+        buffer  << beginPoint << endPoint << floor
                 << (u32)std::stoi(properties[0]) 
                 << (u32)std::stoi(properties[1]) 
                 << (u8 )std::stoi(properties[2]);

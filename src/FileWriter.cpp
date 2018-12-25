@@ -29,8 +29,7 @@ namespace {
 
     void writeSingleObjectHeader(BinaryFileBuffer& buffer, const Position& position, uint8_t floor) {
         buffer << position << (u8)floor;
-    }
-    
+    }    
 }
 
 void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
@@ -40,12 +39,14 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
             << (u8)std::stoi(level.numFloors)
             << (u8)level.backmusic << (u8)level.theme << (u8)level.weather;
 
-    //WALLS
+    //Walls
     writeObjectTypeHeader(bBuffer, ObjectID::Wall, level.walls.size(), 
         {PType::Texture, PType::Texture, PType::QValue});
     for (const auto& wall : level.walls) {
         bBuffer << wall;
     } 
+
+    //Floors
             
     //Final output
     std::ofstream outfile3(fileName + "_v2", std::ofstream::binary);
