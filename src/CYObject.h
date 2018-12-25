@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+#include "BinaryFile.h"
+
 enum class ObjectID : uint8_t {
     Chaser		    = 0,
     Crumbs		    = 1,
@@ -43,11 +45,12 @@ enum class ObjectID : uint8_t {
  * 
  */
 struct Position {
-    int16_t x = 0;
+    int x = 0;
     int z = 0;
 
-    int16_t serialize() {
-
+    template<typename Buffer>
+    void serialize(Buffer& buffer) const {
+        buffer << (u16)x << (u16)z;
     }
 };
 
@@ -77,6 +80,15 @@ struct CYWall {
     Position endPoint;
     std::vector<std::string> properties;
     uint8_t floor;
+
+    template<typename Buffer>
+    void serialize(Buffer& buffer) const {
+        buffer << beginPoint << endPoint << floor
+                << (u32)std::stoi(properties[0]) 
+                << (u32)std::stoi(properties[1]) 
+                << (u8 )std::stoi(properties[2]);
+        
+    }
 
     void verifyPropertyCount();
 };
