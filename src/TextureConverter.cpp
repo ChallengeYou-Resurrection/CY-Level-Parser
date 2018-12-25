@@ -47,11 +47,6 @@ namespace {
         }
     }
 
-    int32_t convertFloorTexture(int texture) {
-
-        return TextureID::None;
-    }
-
     int32_t convertPlatformTexture(int texture) {
         switch (texture)
         {
@@ -109,7 +104,7 @@ int32_t convertTexture(ObjectID object, const std::string& texture) {
         case ObjectID::TriPlatform:
         case ObjectID::DiaPlatform:
         case ObjectID::Ramp:
-            return convertFloorTexture(std::stoi(texture));
+            return convertPlatformTexture(std::stoi(texture));
 
         default:
             std::cerr << "UNKNOWN OBEJCT";
