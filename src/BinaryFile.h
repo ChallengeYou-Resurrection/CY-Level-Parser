@@ -6,6 +6,7 @@
 
 using u8 = uint8_t;
 using u16 = uint16_t;
+using i16 = int16_t;
 using u32 = uint32_t;
 
 class BinaryFileBuffer {
@@ -13,6 +14,12 @@ class BinaryFileBuffer {
         friend BinaryFileBuffer& operator <<(BinaryFileBuffer& buff, u8 n) {
             auto value = reinterpret_cast<const char*>(&n);
             buff.write(value, sizeof(u8));
+            return buff;
+        }
+
+        friend BinaryFileBuffer& operator <<(BinaryFileBuffer& buff, i16 n) {
+            auto value = reinterpret_cast<const char*>(&n);
+            buff.write(value, sizeof(i16));
             return buff;
         }
         
