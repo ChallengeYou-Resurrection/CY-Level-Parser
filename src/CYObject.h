@@ -50,7 +50,7 @@ struct Position {
 
     template<typename Buffer>
     void serialize(Buffer& buffer) const {
-        buffer << (u16)x << (u16)z;
+        buffer << (i16)x << (i16)z;
     }
 };
 
@@ -81,8 +81,9 @@ struct CYWall {
  */
 struct CYObject {
     Position position; 
-    std::vector<std::string> properties;
     uint8_t floor;
+
+    std::vector<std::string> properties;
 
     void serialize(BinaryFileBuffer& buffer) const;
     void verifyPropertyCount(ObjectID id);
@@ -101,6 +102,13 @@ struct CYLevel {
     CYObjectMap objects;
     std::vector<CYFloor> floors;
     std::vector<CYWall> walls;
+
+    size_t numObjects(ObjectID id) const {
+        return objects.at(id).size();
+    }
 };
 
 ObjectID stringToObjectID(const std::string& objectName);
+
+
+void serializeObject(BinaryFileBuffer& buffer, ObjectID id);
