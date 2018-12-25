@@ -106,7 +106,7 @@ uint32_t convertTexture(ObjectID object, const std::string& texture) {
 
         default:
             std::cerr << "UNKNOWN OBEJCT";
-            return -1;
+            return TextureID::Unknown;
     }
 
 }

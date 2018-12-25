@@ -6,7 +6,7 @@
 //This is not an enum class because of colour textures are represented using 24bits for RGB
 //Layout for colours: 00000000RRRRRRRRGGGGGGGGBBBBBBBB
 namespace TextureID {
-    enum {
+    enum : uint32_t  {
         // Normal Textures
         Grass = 1,
         Stucco = 2,
@@ -26,6 +26,7 @@ namespace TextureID {
         Bars = 14,
         Glass = 15,
         None = 16,
+        Unknown = 17
     };
 }
 
