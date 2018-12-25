@@ -170,6 +170,8 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
                     floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
                     floor.properties = extractProperties(d.substr(s[i + 6].first, s[i + 6].second));
+                    floor.properties[0] = std::to_string(convertTexture(objId, floor.properties[0]));
+                    floor.properties[2] = std::to_string(convertTexture(objId, floor.properties[2]));
                     floor.floor = ++floorNumber;
                     floors.push_back(floor);
                 }
