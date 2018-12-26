@@ -255,7 +255,6 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                             object.properties[1] = std::to_string(convertTexture(objId, object.properties[1]));
                         }
                         if (objId == ObjectID::DiaPlatform) {
-                            std::cout << object.properties[1] << '\n';
                         }
                     }
 
@@ -280,8 +279,8 @@ std::optional<CYLevel> parseFile(const char* fileName) {
 }
 
 void printErrors() {
-    std::cout << "\n=======================================\n";
-    std::cout << "Printing all error levels came across: \n";
+    std::cout   << "\n=======================================\n"
+                << "Printing all error levels came across: \n";
     for (const auto& error : errors) {
         std::cout   << "File: " << error.name << "\n"
                     << "\tReason: " << error.reason << "\n\n";

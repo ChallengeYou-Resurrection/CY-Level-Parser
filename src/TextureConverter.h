@@ -3,8 +3,9 @@
 #include <string>
 #include "CYObject.h"
 
-//This is not an enum class because of colour textures are represented using 24bits for RGB
-//Layout for colours: 00000000RRRRRRRRGGGGGGGGBBBBBBBB
+//This is not an enum class because of colour textures are represented using 32bits for RGBT
+//where T is just 255 in binary to ID this is a texure
+//Layout for colours: RRRRRRRRGGGGGGGGBBBBBBBB11111111
 namespace TextureID {
     enum : uint32_t  {
         // Normal Textures
