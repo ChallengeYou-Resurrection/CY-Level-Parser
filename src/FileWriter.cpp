@@ -11,14 +11,15 @@
 
 namespace {
     enum class PType : uint8_t {
-        Texture     = 0,
-        QValue      = 1,
-        Floor       = 2,
-        IsHidden    = 3,
-        Size        = 4,
-        Direction   = 5,
-        Message     = 6,
-
+        Texture     = 0, //Texture
+        QValue      = 1, //The "height" of objects, eg walls and platforms 
+        IsHidden    = 2, //For floors, whether or not it is hidden or not
+        Size        = 3, //Resizable objects such as all platforms, and pillars
+        Direction   = 4, //Directional objects such as triplats, boards, ramps etc
+        Message     = 5, //For objects that have a string (eg Portal and Board)
+        Flip        = 6, //For objects that have a binary option eg pillars stright or dia, or triwalls flip
+        FuelType    = 7, //For JetPacks; Whether the jetpack needs fuel or nah
+        WinCond     = 8, //Win condition, such as portals and finish marker
         Unknown     = 250,
     };
 
@@ -90,7 +91,9 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     //Crumbs		
     
     //DiaPlatform	
-    
+    writeObjectGroup(bBuffer, level, ObjectID::DiaPlatform, 
+        {PType::Size, PType::Texture, PType::QValue});
+
     //Diamond		
     
     //Door	
@@ -111,7 +114,9 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     
     //Message		
     
-    //Pillar		
+    //Pillar
+    writeObjectGroup(bBuffer, level, ObjectID::Platform, 
+        {PType::Flip, PType::Texture, PType::Size, PType::QValue});
     
     //Platform	
     writeObjectGroup(bBuffer, level, ObjectID::Platform, 
@@ -120,7 +125,9 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
 
     //Portal		
     
-    //Ramp		
+    //Ramp	
+    writeObjectGroup(bBuffer, level, ObjectID::Ramp, 
+        {PType::Direction, PType::Texture});	
     
     //Shield		
     
@@ -134,7 +141,9 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     writeObjectGroup(bBuffer, level, ObjectID::TriPlatform, 
         {PType::Size, PType::Texture, PType::Direction, PType::QValue});
     
-    //TriWall		
+    //TriWall	
+    writeObjectGroup(bBuffer, level, ObjectID::TriWall, 
+        {PType::Flip, PType::Texture, PType::Direction});	
 
 
     //Final output
