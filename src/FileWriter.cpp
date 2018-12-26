@@ -21,9 +21,15 @@ namespace {
         FuelType    = 7, //For JetPacks; Whether the jetpack needs fuel or nah
         WinCond     = 8, //Win condition, such as portals and finish marker
         Amount      = 9, //Objects such as crumbs, sheilds, and fuel allow you to choose amount
+        TeleID      = 10, //Keys, doors, locks, teleports
+        KeyID       = 11,
+        Speed       = 12,
+        Strength    = 13,
+        DiamondType = 14,
         Unknown     = 250,
     };
 
+    //Writes header info about an object
     void writeObjectTypeHeader(BinaryFileBuffer& buffer, ObjectID id, 
         size_t numObjects, const std::initializer_list<PType>& format) 
     {
@@ -33,10 +39,12 @@ namespace {
         }
     }   
 
+    //Writes the position and floor of a single object
     void writeSingleObjectHeader(BinaryFileBuffer& buffer, const Position& position, uint8_t floor) {
         buffer << position << (u8)floor;
     }
 
+    //Write an object group for when the properties are ALL u8 (this is just for a slight optimization)
     void writeAllU8Group(BinaryFileBuffer& buffer, const CYLevel& level, 
             ObjectID id, const std::initializer_list<PType>& format)
     {
@@ -45,15 +53,14 @@ namespace {
             for (const auto& obj : level.objects[(int)id]) {
                 writeSingleObjectHeader(buffer, obj.position, obj.floor);
                 const auto& props = obj.properties;
-                size_t index = 0;
-                for (auto ptype : format) {
-                    buffer << (u8)std::stoi(props[index]);
-                    index++;
+                for (size_t i = 0; i < format.size(); i++) { 
+                    buffer << (u8)std::stoi(props[i]);
                 }
             }
         }
     }
 
+    //Write an object group for mixture of property types
     void writeObjectGroup(BinaryFileBuffer& buffer, const CYLevel& level, 
             ObjectID id, const std::initializer_list<PType>& format) 
     {
@@ -116,10 +123,16 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
         {PType::Size, PType::Texture, PType::QValue});
 
     //Diamond		
-    
+    writeAllU8Group(bBuffer, level, ObjectID::Diamond, 
+        {PType::DiamondType, PType::QValue});
+
     //Door	
+    writeObjectGroup(bBuffer, level, ObjectID::Door, 
+        {PType::Flip, PType::KeyID, PType::Texture});	
     
     //Finish		
+    writeAllU8Group(bBuffer, level, ObjectID::Finish, 
+        {PType::WinCond});	
     
     //Fuel	
     writeAllU8Group(bBuffer, level, ObjectID::Fuel, 
@@ -129,11 +142,18 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     writeAllU8Group(bBuffer, level, ObjectID::Hole, 
         {PType::Size});
     
-    //Iceman		
+    //Iceman
+    writeAllU8Group(bBuffer, level, ObjectID::Iceman, 
+        {PType::Speed, PType::Strength});	
+    	
     
     //JetPack		
+    writeAllU8Group(bBuffer, level, ObjectID::JetPack, 
+        {PType::FuelType});	
     
-    //Key		    
+    //Key		
+    writeAllU8Group(bBuffer, level, ObjectID::Key, 
+        {PType::KeyID});		    
     
     //Ladder		
     writeAllU8Group(bBuffer, level, ObjectID::Ladder, 
@@ -172,6 +192,8 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
         {PType::Direction});	
     
     //Teleport	
+    writeAllU8Group(bBuffer, level, ObjectID::Teleport, 
+        {PType::TeleID});	
 
     //TriPlatform 
     writeObjectGroup(bBuffer, level, ObjectID::TriPlatform, 

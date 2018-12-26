@@ -221,6 +221,12 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                             object.properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));
                             break;
 
+                        //Some objects had a pointless first property
+                        case ObjectID::Key:
+                        case ObjectID::Teleport:
+                            object.properties.push_back(extractProperties(d.substr(s[i + 1].first, s[i + 1].second))[1]);
+                            break;
+
                         default: 
                             object.properties = extractProperties(d.substr(s[i + 1].first, s[i + 1].second));
                             break;
