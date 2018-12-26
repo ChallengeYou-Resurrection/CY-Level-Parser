@@ -16,10 +16,11 @@ namespace {
         IsHidden    = 2, //For floors, whether or not it is hidden or not
         Size        = 3, //Resizable objects such as all platforms, and pillars
         Direction   = 4, //Directional objects such as triplats, boards, ramps etc
-        Message     = 5, //For objects that have a string (eg Portal and Board)
-        Flip        = 6, //For objects that have a binary option eg pillars stright or dia, or triwalls flip
+        Message     = 5, //String (eg Portal and Board)
+        Flip        = 6, //binary geometry option eg pillars stright or dia, or triwalls flip
         FuelType    = 7, //For JetPacks; Whether the jetpack needs fuel or nah
         WinCond     = 8, //Win condition, such as portals and finish marker
+        Amount      = 9, //Objects such as crumbs, sheilds, and fuel allow you to choose amount
         Unknown     = 250,
     };
 
@@ -88,7 +89,9 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
 
     //Chaser		
     
-    //Crumbs		
+    //Crumbs	
+    writeObjectGroup(bBuffer, level, ObjectID::Crumbs, 
+        {PType::Amount});
     
     //DiaPlatform	
     writeObjectGroup(bBuffer, level, ObjectID::DiaPlatform, 
@@ -100,9 +103,13 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     
     //Finish		
     
-    //Fuel		
+    //Fuel	
+    writeObjectGroup(bBuffer, level, ObjectID::Fuel, 
+        {PType::Amount});	
     
     //Hole		
+    writeObjectGroup(bBuffer, level, ObjectID::Hole, 
+        {PType::Size});
     
     //Iceman		
     
@@ -111,29 +118,40 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     //Key		    
     
     //Ladder		
+    writeObjectGroup(bBuffer, level, ObjectID::Ladder, 
+        {PType::Direction});
     
     //Message		
-    
+    writeObjectGroup(bBuffer, level, ObjectID::Message, 
+        {PType::Message, PType::Direction, PType::QValue});
+
     //Pillar
-    writeObjectGroup(bBuffer, level, ObjectID::Platform, 
+    writeObjectGroup(bBuffer, level, ObjectID::Pillar, 
         {PType::Flip, PType::Texture, PType::Size, PType::QValue});
     
     //Platform	
     writeObjectGroup(bBuffer, level, ObjectID::Platform, 
         {PType::Size, PType::Texture, PType::QValue});
     
-
-    //Portal		
+    //Portal	
+    writeObjectGroup(bBuffer, level, ObjectID::Portal, 
+        {PType::Message, PType::WinCond, PType::Message});
     
     //Ramp	
     writeObjectGroup(bBuffer, level, ObjectID::Ramp, 
         {PType::Direction, PType::Texture});	
     
-    //Shield		
+    //Shield	
+    writeObjectGroup(bBuffer, level, ObjectID::Shield, 
+        {PType::Amount});		
     
     //Slingshot	
+    writeObjectGroup(bBuffer, level, ObjectID::Slingshot, 
+        {PType::QValue});	
     
     //Start		
+    writeObjectGroup(bBuffer, level, ObjectID::Start, 
+        {PType::Direction});	
     
     //Teleport	
 
@@ -146,7 +164,20 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
         {PType::Flip, PType::Texture, PType::Direction});	
 
 
-    //Final output
-    std::ofstream outfile3(fileName + "_v2", std::ofstream::binary);
+    //Final output and create a filename to output as
+    auto pathidx = [&fileName]() {
+        for (size_t i = 0; i < fileName.size(); i++) {
+            if (std::isdigit(fileName[i])) {
+                return i;
+            }
+        }
+        return std::string::npos;
+    }();
+    auto path = fileName.substr(0, pathidx);
+    auto gameNumber = fileName.substr(pathidx);
+    gameNumber = gameNumber.substr(0, gameNumber.find('.'));
+    auto outputName = path + level.name + "[" + gameNumber + "].cyb";
+
+    std::ofstream outfile3(outputName, std::ofstream::binary);
     outfile3.write(bBuffer.getBuffer(), bBuffer.bufferSize());
 }
