@@ -26,14 +26,19 @@ void CYObject::verifyPropertyCount(ObjectID id) {
             }
             break;
 
-        case ObjectID::Diamond:
         case ObjectID::Finish:
+            switch (propCount) {
+                case 2:
+                    properties.erase(properties.begin());
+                    break;
+            }
+        case ObjectID::Diamond:
         case ObjectID::Iceman:
         case ObjectID::Ramp:
             switch (propCount) {
                 case 1:
-                addBackProp(properties);
-                break;
+                    addBackProp(properties);
+                    break;
             }
             break;
 

@@ -49,8 +49,7 @@ struct Position {
     int x = 0;
     int z = 0;
 
-    template<typename Buffer>
-    void serialize(Buffer& buffer) const {
+    void serialize(BinaryFileBuffer& buffer) const {
         buffer << (i16)x << (i16)z;
     }
 };
