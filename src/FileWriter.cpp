@@ -25,6 +25,7 @@ namespace {
         KeyID       = 11,   //Key to doors
         Speed       = 12,   //Icemen speed
         Strength    = 13,   //Icemen strength
+        ChaserStyle = 14,   //Chasers can be saucer, pumpkin, or ghost
         DiamondType = 14,   //Diamonds have different types
     };  
 
@@ -112,7 +113,8 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     } 
 
     //Chaser		
-    
+    writeAllU8Group(bBuffer, level, ObjectID::Chaser, 
+        {PType::Speed, PType::ChaserStyle});
     //Crumbs	
     writeAllU8Group(bBuffer, level, ObjectID::Crumbs, 
         {PType::Amount});
