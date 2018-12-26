@@ -8,7 +8,7 @@
 
 namespace fs = std::filesystem;
 
-#define USE_SAMPLE_GAMES 
+//#define USE_SAMPLE_GAMES 
 #ifdef USE_SAMPLE_GAMES
     #define SINGLE_GAME
     #ifdef SINGLE_GAME
@@ -60,14 +60,19 @@ void writeLevel(const std::string& name, const CYLevel& level) {
         outfile << "\n\n";               
     }
     
-    for (const auto& cyObject : level.objects) {
-        outfile << "Object ID: " << (int)cyObject.first << '\n';
-        for (const auto& obj : cyObject.second) {
+    for (size_t i = 0; i < level.objects.size(); i++) {
+        outfile << "Object ID: " << i << '\n';
+        for (const auto& obj : level.objects[i]) {
             outfile << "\tPosition:   " << obj.position.x << " " << obj.position.z << '\n'
                     << "\tFloor:      " << (int)obj.floor << '\n'
                     << "\tProperties: ";
             for (const auto& p : obj.properties) {
-                outfile << p << ' ';
+                if (i == (int)ObjectID::Message) {
+                    outfile << "\n\tMessage Prop: " << p;
+                }
+                else {
+                    outfile << p << ' ';
+                }
             }
             outfile << "\n\n";
         }
@@ -92,28 +97,38 @@ auto getGamesDirectoryItr() {
 }
 
 int main() {
-    #ifndef USE_SAMPLE_GAMES
+#ifndef USE_SAMPLE_GAMES
     benchmark::Timer<> timer;
     const int percentIncrement = std::distance(getGamesDirectoryItr(), fs::directory_iterator{}) / 100;
     int count = 0;
     int progress = 0;
     std::cout << "Total files: " << percentIncrement * 100 << std::endl;
     timer.reset();
-    #endif
+#endif
     for (const auto& path : getGamesDirectoryItr()) {
-        #ifndef USE_SAMPLE_GAMES
+#ifndef USE_SAMPLE_GAMES
         if (++count % percentIncrement == 0) {
             printf("Progress: %d%% [%d out of %d games converted] ", ++progress, count, percentIncrement * 100);
             printf("[Time: %fms]\n", timer.getTime());
             timer.reset();
         }
-        #endif
+#endif
 
         const std::string name = path.path().filename().string();
+        //std::cout << "Doing: " << name << "'\n";
         auto level = readFile(path.path().c_str());
         if (level) {
+#ifdef SINGLE_GAME
+#define TIMES 1
+            benchmark::Benchmark<TIMES>(std::string(name + ": Text  ").c_str(), 
+                &writeLevel, name, *level).outputTimes();
+            benchmark::Benchmark<TIMES>(std::string(name + ": Binary").c_str(), 
+                &writeLevelBinary, *level, OUT + name + ".cyb").outputTimes();
+            std::cout << "\n\n\n\n\n\n\n";
+#else 
             writeLevelBinary(*level, OUT + name + ".cyb");
-            writeLevel(name, *level);
+            //writeLevel(name, *level);
+#endif
         }   
     }
     printErrors();

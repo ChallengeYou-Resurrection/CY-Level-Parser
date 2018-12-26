@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+#include "BinaryFile.h"
+
 enum class ObjectID : uint8_t {
     Chaser		    = 0,
     Crumbs		    = 1,
@@ -31,6 +33,7 @@ enum class ObjectID : uint8_t {
     TriPlatform 	= 22,
     TriWall		    = 23,
     Wall		    = 24,
+    NUM_OBJECTS     = 25,
     
     Theme		    = 250,
     Weather		    = 251,
@@ -45,18 +48,10 @@ enum class ObjectID : uint8_t {
 struct Position {
     int x = 0;
     int z = 0;
-};
 
-/**
- * @brief Represents a single CY Object
- * 
- */
-struct CYObject {
-    Position position; 
-    std::vector<std::string> properties;
-    uint8_t floor;
-
-    void verifyPropertyCount(ObjectID id);
+    void serialize(BinaryFileBuffer& buffer) const {
+        buffer << (i16)x << (i16)z;
+    }
 };
 
 struct CYFloor {
@@ -64,8 +59,10 @@ struct CYFloor {
     Position vertexB;
     Position vertexC;
     Position vertexD;
-    std::vector<std::string> properties;
     uint8_t floor;
+    std::vector<std::string> properties;
+
+    void serialize(BinaryFileBuffer& buffer) const;
 };
 
 struct CYWall {
@@ -74,10 +71,25 @@ struct CYWall {
     std::vector<std::string> properties;
     uint8_t floor;
 
+    void serialize(BinaryFileBuffer& buffer) const;
     void verifyPropertyCount();
 };
 
-using CYObjectMap = std::unordered_map<ObjectID, std::vector<CYObject>>;
+/**
+ * @brief Represents a single CY Object
+ * 
+ */
+struct CYObject {
+    Position position; 
+    uint8_t floor;
+
+    std::vector<std::string> properties;
+
+    void serialize(BinaryFileBuffer& buffer) const;
+    void verifyPropertyCount(ObjectID id);
+};
+
+using CYObjectMap = std::array<std::vector<CYObject>, (int)ObjectID::NUM_OBJECTS>;
 struct CYLevel {
     std::string name;
     std::string creator;
@@ -90,6 +102,10 @@ struct CYLevel {
     CYObjectMap objects;
     std::vector<CYFloor> floors;
     std::vector<CYWall> walls;
+
+    size_t numObjects(ObjectID id) const {
+        return objects[(int)id].size();
+    }
 };
 
 ObjectID stringToObjectID(const std::string& objectName);

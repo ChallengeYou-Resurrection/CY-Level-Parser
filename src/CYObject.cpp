@@ -26,14 +26,19 @@ void CYObject::verifyPropertyCount(ObjectID id) {
             }
             break;
 
-        case ObjectID::Diamond:
         case ObjectID::Finish:
+            switch (propCount) {
+                case 2:
+                    properties.erase(properties.begin());
+                    break;
+            }
+        case ObjectID::Diamond:
         case ObjectID::Iceman:
         case ObjectID::Ramp:
             switch (propCount) {
                 case 1:
-                addBackProp(properties);
-                break;
+                    addBackProp(properties);
+                    break;
             }
             break;
 
@@ -112,4 +117,18 @@ ObjectID stringToObjectID(const std::string& objectName) {
         {"flight",      ObjectID::Unknown       },
     };
     return objects.at(objectName);
+}
+
+void CYFloor::serialize(BinaryFileBuffer& buffer) const {
+    buffer  << vertexA << vertexB << vertexC << vertexD << floor << floor 
+            << (u32)std::stoul(properties[0]) 
+            << (u32)std::stoul(properties[2]) 
+            << (u8 )std::stoi(properties[1]);
+}
+
+void CYWall::serialize(BinaryFileBuffer& buffer) const {
+    buffer  << beginPoint << endPoint << floor
+            << (u32)std::stoul(properties[0]) 
+            << (u32)std::stoul(properties[1]) 
+            << (u8 )std::stoi(properties[2]);
 }
