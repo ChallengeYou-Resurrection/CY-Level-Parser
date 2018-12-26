@@ -21,13 +21,12 @@ namespace {
         FuelType    = 7, //For JetPacks; Whether the jetpack needs fuel or nah
         WinCond     = 8, //Win condition, such as portals and finish marker
         Amount      = 9, //Objects such as crumbs, sheilds, and fuel allow you to choose amount
-        TeleID      = 10, //Keys, doors, locks, teleports
-        KeyID       = 11,
-        Speed       = 12,
-        Strength    = 13,
-        DiamondType = 14,
-        Unknown     = 250,
-    };
+        TeleID      = 10,   //Teleports connect to eachother
+        KeyID       = 11,   //Key to doors
+        Speed       = 12,   //Icemen speed
+        Strength    = 13,   //Icemen strength
+        DiamondType = 14,   //Diamonds have different types
+    };  
 
     //Writes header info about an object
     void writeObjectTypeHeader(BinaryFileBuffer& buffer, ObjectID id, 

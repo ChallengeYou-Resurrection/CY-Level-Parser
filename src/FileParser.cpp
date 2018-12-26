@@ -57,8 +57,76 @@ namespace {
     }
 
     //Extracts the properties from a string which contains a message
-    std::vector<std::string> extractPropertiesMessage(const std::string& properties) {
-        return split(properties, ',', true);
+    std::optional<std::vector<std::string>> extractPropertiesMessage(const std::string& properties, ObjectID id) {
+        /*
+        std::string quote;
+        auto lastQuotePos = [](const std::string& str) {
+            for (int i = str.length() - 1; i >= 0; i--) {
+                if (str[i] == '\"') {
+                    return (size_t)i;
+                }
+            }
+            return std::string::npos;
+        };
+
+        if (id == ObjectID::Message) {
+            auto finalQuote = lastQuotePos(properties);
+            quote = properties.substr(1, finalQuote - 1);
+
+            auto lastPart = properties.substr(finalQuote + 1);
+            auto lastProps = split(lastPart, ',');
+            std::cout << "Properties: " << properties << "\n";
+            std::cout << "Quote: " << quote << "\n";
+            for (auto& p : lastProps) {
+                std::cout << "Last prop: <" << p << ">\n";
+            }
+            std::cout << "\n\n";
+        }
+        else if (id == ObjectID::Portal) {
+            auto gameNumBeginPos = [&properties]() {
+                bool second = false;
+                for (int i = properties.length() - 1; i >= 0; i--) {
+                    if (properties[i] == '\"' && !second) {
+                        second = true;
+                    } 
+                    else if (properties[i] == '\"') {
+                        return (size_t)i;
+                    } 
+                }
+                return std::string::npos;
+            }();
+            auto gameNumber = properties.substr(gameNumBeginPos + 1);
+            gameNumber.pop_back();
+
+            auto firstPart = properties.substr(0, gameNumBeginPos - 2);
+            auto firstQuoteEnd = lastQuotePos(firstPart);
+            auto quote = firstPart.substr(1, firstQuoteEnd - 1);
+            auto props = split(firstPart, ',', true);
+
+            return {quote, props.back(), gameNumber};
+        }
+        */
+        auto numQuotes = std::count(properties.cbegin(), properties.cend(), '\"');
+        if (id == ObjectID::Message && numQuotes != 2) {
+            return {};
+        }
+        else if (id == ObjectID::Portal && numQuotes != 4) {
+            return {};
+        }
+        auto props = split(properties, ',', true);
+
+        auto removeOuterQuotes = [](std::string& s) {
+            return s.substr(1, s.length() - 2);
+        };
+        if (id == ObjectID::Message) {
+            removeOuterQuotes(props[0]);
+        }
+        else if (id == ObjectID::Portal) {
+            removeOuterQuotes(props[0]);
+            removeOuterQuotes(props[2]);
+        }
+
+        return props;
     }
 }
 
@@ -160,6 +228,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
         const auto& s = sections;
         const auto& d = data;  
         switch(objId) {
+            /**
+             * Extract floors; which have a specific layout 
+             */
             case ObjectID::Floor:{
                 std::vector<CYFloor> floors;
                 uint8_t floorNumber = 0;
@@ -178,6 +249,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 level.floors = std::move(floors);
             }break;
 
+            /**
+             * Extract walls; which have a specific layout 
+             */
             case ObjectID::Wall:{
                 std::vector<CYWall> walls;
                 for (size_t i = 0; i < s.size() - 1; i += 2) {
@@ -209,6 +283,9 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                 level.walls = std::move(walls);
             }break;
 
+            /**
+             * Extract all other objects types that do not have a special layout
+             */
             default: {
                 std::vector<CYObject> objects; 
                 for (size_t i = 0; i < s.size() - 1; i += 3) {
@@ -216,10 +293,22 @@ std::optional<CYLevel> parseFile(const char* fileName) {
 
                     CYObject object;
                     switch (objId) {
-                        case ObjectID::Message:
-                        case ObjectID::Portal:
-                            object.properties = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second));
-                            break;
+                        case ObjectID::Message:{
+                            auto p = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second), objId);
+                            if (!p) {
+                                errors.emplace_back(fileName, "Message contains too many quotes");
+                                return {};
+                            }
+                            object.properties = *p;
+                            }break;
+                        case ObjectID::Portal:{
+                            auto p = extractPropertiesMessage(d.substr(s[i + 1].first, s[i + 1].second), objId);
+                            if (!p) {
+                                errors.emplace_back(fileName, "Portal contains too many quotes");
+                                return {};
+                            }
+                            object.properties = *p;
+                            }break;
 
                         //Some objects had a pointless first property
                         case ObjectID::Key:

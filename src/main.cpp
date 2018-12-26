@@ -67,7 +67,12 @@ void writeLevel(const std::string& name, const CYLevel& level) {
                     << "\tFloor:      " << (int)obj.floor << '\n'
                     << "\tProperties: ";
             for (const auto& p : obj.properties) {
-                outfile << p << ' ';
+                if (i == (int)ObjectID::Message) {
+                    outfile << "\n\tMessage Prop: " << p;
+                }
+                else {
+                    outfile << p << ' ';
+                }
             }
             outfile << "\n\n";
         }
@@ -110,16 +115,19 @@ int main() {
 #endif
 
         const std::string name = path.path().filename().string();
+        std::cout << "Doing: " << name << "'\n";
         auto level = readFile(path.path().c_str());
         if (level) {
 #ifdef SINGLE_GAME
-            benchmark::Benchmark<100>(std::string(name + ": Binary").c_str(), 
+#define TIMES 1
+            benchmark::Benchmark<TIMES>(std::string(name + ": Text  ").c_str(), 
+                &writeLevel, name, *level).outputTimes();
+            benchmark::Benchmark<TIMES>(std::string(name + ": Binary").c_str(), 
                 &writeLevelBinary, *level, OUT + name + ".cyb").outputTimes();
-            benchmark::Benchmark<100>(std::string(name + ": Text  ").c_str(), 
-                &writeLevel, OUT + name + ".cyb", *level).outputTimes();
+            std::cout << "\n\n\n\n\n\n\n";
 #else 
             writeLevelBinary(*level, OUT + name + ".cyb");
-            writeLevel(OUT + name + ".cyb", *level);
+            writeLevel(name, *level);
 #endif
         }   
     }
