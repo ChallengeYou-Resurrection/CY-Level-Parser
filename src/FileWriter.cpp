@@ -17,16 +17,51 @@ namespace {
         IsHidden    = 3,
         Size        = 4,
         Direction   = 5,
+        Message     = 6,
 
         Unknown     = 250,
     };
 
-    void writeObjectTypeHeader(BinaryFileBuffer& buffer, ObjectID id, size_t numObjects, const std::initializer_list<PType>& format) {
+    void writeObjectTypeHeader(BinaryFileBuffer& buffer, ObjectID id, 
+        size_t numObjects, const std::initializer_list<PType>& format) 
+    {
         buffer << (u8)id << (u8)format.size() << (u32)numObjects;
         for (auto& property : format) {
             buffer << (u8)property;
         }
     }   
+
+    void writeSingleObjectHeader(BinaryFileBuffer& buffer, const Position& position, uint8_t floor) {
+        buffer << position << (u8)floor;
+    }
+
+    void writeObjectGroup(BinaryFileBuffer& buffer, const CYLevel& level, 
+            ObjectID id, const std::initializer_list<PType>& format) 
+    {
+        if (level.numObjects(id)) {
+            writeObjectTypeHeader(buffer, id, level.numObjects(id), format);
+            for (const auto& obj : level.objects[(int)id]) {
+                const auto& props = obj.properties;
+                size_t index = 0;
+                for (auto ptype : format) {
+                    switch(ptype) {
+                        case PType::Texture:
+                            buffer << (u32)std::stoul(props[index]);
+                            break;
+
+                        case PType::Message:
+                            buffer << props[index];
+                            break;
+
+                        default:
+                            buffer << (u8)std::stoi(props[index]);
+                            break;
+                    }
+                    index++;
+                }
+            }
+        }
+    }
 }
 
 void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
@@ -79,7 +114,10 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     //Pillar		
     
     //Platform	
+    writeObjectGroup(bBuffer, level, ObjectID::Platform, 
+        {PType::Size, PType::Texture, PType::QValue});
     
+
     //Portal		
     
     //Ramp		
@@ -91,12 +129,13 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     //Start		
     
     //Teleport	
-    
+
     //TriPlatform 
+    writeObjectGroup(bBuffer, level, ObjectID::TriPlatform, 
+        {PType::Size, PType::Texture, PType::Direction, PType::QValue});
     
     //TriWall		
-   //// writeObjectTypeHeader(bBuffer, ObjectID::TriPlatform, level.numObjects(ObjectID::TriPlatform), 
-    //    {PType::Size, PType::Texture, PType::Direction});
+
 
     //Final output
     std::ofstream outfile3(fileName + "_v2", std::ofstream::binary);
