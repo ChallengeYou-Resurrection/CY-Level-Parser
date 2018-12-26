@@ -37,12 +37,30 @@ namespace {
         buffer << position << (u8)floor;
     }
 
+    void writeAllU8Group(BinaryFileBuffer& buffer, const CYLevel& level, 
+            ObjectID id, const std::initializer_list<PType>& format)
+    {
+        if (level.numObjects(id)) {
+            writeObjectTypeHeader(buffer, id, level.numObjects(id), format);
+            for (const auto& obj : level.objects[(int)id]) {
+                writeSingleObjectHeader(buffer, obj.position, obj.floor);
+                const auto& props = obj.properties;
+                size_t index = 0;
+                for (auto ptype : format) {
+                    buffer << (u8)std::stoi(props[index]);
+                    index++;
+                }
+            }
+        }
+    }
+
     void writeObjectGroup(BinaryFileBuffer& buffer, const CYLevel& level, 
             ObjectID id, const std::initializer_list<PType>& format) 
     {
         if (level.numObjects(id)) {
             writeObjectTypeHeader(buffer, id, level.numObjects(id), format);
             for (const auto& obj : level.objects[(int)id]) {
+                writeSingleObjectHeader(buffer, obj.position, obj.floor);
                 const auto& props = obj.properties;
                 size_t index = 0;
                 for (auto ptype : format) {
@@ -90,7 +108,7 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     //Chaser		
     
     //Crumbs	
-    writeObjectGroup(bBuffer, level, ObjectID::Crumbs, 
+    writeAllU8Group(bBuffer, level, ObjectID::Crumbs, 
         {PType::Amount});
     
     //DiaPlatform	
@@ -104,11 +122,11 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     //Finish		
     
     //Fuel	
-    writeObjectGroup(bBuffer, level, ObjectID::Fuel, 
+    writeAllU8Group(bBuffer, level, ObjectID::Fuel, 
         {PType::Amount});	
     
     //Hole		
-    writeObjectGroup(bBuffer, level, ObjectID::Hole, 
+    writeAllU8Group(bBuffer, level, ObjectID::Hole, 
         {PType::Size});
     
     //Iceman		
@@ -118,7 +136,7 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
     //Key		    
     
     //Ladder		
-    writeObjectGroup(bBuffer, level, ObjectID::Ladder, 
+    writeAllU8Group(bBuffer, level, ObjectID::Ladder, 
         {PType::Direction});
     
     //Message		
@@ -142,15 +160,15 @@ void writeLevelBinary(const CYLevel& level, const std::string& fileName) {
         {PType::Direction, PType::Texture});	
     
     //Shield	
-    writeObjectGroup(bBuffer, level, ObjectID::Shield, 
+    writeAllU8Group(bBuffer, level, ObjectID::Shield, 
         {PType::Amount});		
     
     //Slingshot	
-    writeObjectGroup(bBuffer, level, ObjectID::Slingshot, 
+    writeAllU8Group(bBuffer, level, ObjectID::Slingshot, 
         {PType::QValue});	
     
     //Start		
-    writeObjectGroup(bBuffer, level, ObjectID::Start, 
+    writeAllU8Group(bBuffer, level, ObjectID::Start, 
         {PType::Direction});	
     
     //Teleport	

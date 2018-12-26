@@ -92,28 +92,35 @@ auto getGamesDirectoryItr() {
 }
 
 int main() {
-    #ifndef USE_SAMPLE_GAMES
+#ifndef USE_SAMPLE_GAMES
     benchmark::Timer<> timer;
     const int percentIncrement = std::distance(getGamesDirectoryItr(), fs::directory_iterator{}) / 100;
     int count = 0;
     int progress = 0;
     std::cout << "Total files: " << percentIncrement * 100 << std::endl;
     timer.reset();
-    #endif
+#endif
     for (const auto& path : getGamesDirectoryItr()) {
-        #ifndef USE_SAMPLE_GAMES
+#ifndef USE_SAMPLE_GAMES
         if (++count % percentIncrement == 0) {
             printf("Progress: %d%% [%d out of %d games converted] ", ++progress, count, percentIncrement * 100);
             printf("[Time: %fms]\n", timer.getTime());
             timer.reset();
         }
-        #endif
+#endif
 
         const std::string name = path.path().filename().string();
         auto level = readFile(path.path().c_str());
         if (level) {
+#ifdef SINGLE_GAME
+            benchmark::Benchmark<100>(std::string(name + ": Binary").c_str(), 
+                &writeLevelBinary, *level, OUT + name + ".cyb").outputTimes();
+            benchmark::Benchmark<100>(std::string(name + ": Text  ").c_str(), 
+                &writeLevel, OUT + name + ".cyb", *level).outputTimes();
+#else 
             writeLevelBinary(*level, OUT + name + ".cyb");
-            writeLevel(name, *level);
+            writeLevel(OUT + name + ".cyb", *level);
+#endif
         }   
     }
     printErrors();

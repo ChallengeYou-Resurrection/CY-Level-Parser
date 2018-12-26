@@ -110,6 +110,3 @@ struct CYLevel {
 };
 
 ObjectID stringToObjectID(const std::string& objectName);
-
-
-void serializeObject(BinaryFileBuffer& buffer, ObjectID id);

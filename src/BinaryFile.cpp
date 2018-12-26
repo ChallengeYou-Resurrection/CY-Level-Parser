@@ -2,6 +2,10 @@
 
 #include <iostream>
 
+BinaryFileBuffer::BinaryFileBuffer() {
+    m_buffer.reserve(65536);
+}
+
 const char* BinaryFileBuffer::getBuffer() const {
     return m_buffer.data();
 }

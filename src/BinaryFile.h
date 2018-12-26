@@ -11,6 +11,8 @@ using u32 = uint32_t;
 
 class BinaryFileBuffer {
     public:
+        BinaryFileBuffer();
+        
         friend BinaryFileBuffer& operator <<(BinaryFileBuffer& buff, u8 n) {
             auto value = reinterpret_cast<const char*>(&n);
             buff.write(value, sizeof(u8));

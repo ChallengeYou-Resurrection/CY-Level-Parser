@@ -127,15 +127,3 @@ void CYWall::serialize(BinaryFileBuffer& buffer) const {
             << (u32)std::stoul(properties[1]) 
             << (u8 )std::stoi(properties[2]);
 }
-
-
-namespace {
-    void writeSingleObjectHeader(BinaryFileBuffer& buffer, const Position& position, uint8_t floor) {
-        buffer << position << (u8)floor;
-    } 
-} 
-
-
-void serializeObject(BinaryFileBuffer& buffer, CYObject& obj, ObjectID id) {
-    
-}
