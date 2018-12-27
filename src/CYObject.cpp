@@ -32,6 +32,7 @@ void CYObject::verifyPropertyCount(ObjectID id) {
                     properties.erase(properties.begin());
                     break;
             }
+            break;
         case ObjectID::Diamond:
         case ObjectID::Iceman:
         case ObjectID::Ramp:
@@ -120,7 +121,7 @@ ObjectID stringToObjectID(const std::string& objectName) {
 }
 
 void CYFloor::serialize(BinaryFileBuffer& buffer) const {
-    buffer  << vertexA << vertexB << vertexC << vertexD << floor << floor 
+    buffer  << vertexA << vertexB << vertexC << vertexD << floor 
             << (u32)std::stoul(properties[0]) 
             << (u32)std::stoul(properties[2]) 
             << (u8 )std::stoi(properties[1]);

@@ -8,9 +8,9 @@
 
 namespace fs = std::filesystem;
 
-//#define USE_SAMPLE_GAMES 
+#define USE_SAMPLE_GAMES 
 #ifdef USE_SAMPLE_GAMES
-    #define SINGLE_GAME
+    //#define SINGLE_GAME
     #ifdef SINGLE_GAME
         #define DIR "../../single"
         #define OUT "../../single_out/"
@@ -113,9 +113,7 @@ int main() {
             timer.reset();
         }
 #endif
-
         const std::string name = path.path().filename().string();
-        //std::cout << "Doing: " << name << "'\n";
         auto level = readFile(path.path().c_str());
         if (level) {
 #ifdef SINGLE_GAME
@@ -127,7 +125,7 @@ int main() {
             std::cout << "\n\n\n\n\n\n\n";
 #else 
             writeLevelBinary(*level, OUT + name + ".cyb");
-            //writeLevel(name, *level);
+            writeLevel(name, *level);
 #endif
         }   
     }
