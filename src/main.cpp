@@ -1,22 +1,32 @@
-#include "FileParser.h"
-#include "Utilities.h"
 #include "Benchmark.h"
+#include "FileParser.h"
 #include "FileWriter.h"
+#include "Utilities.h"
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 namespace fs = std::filesystem;
 
 const char* OUT = "out/";
 
 #include <json.hpp>
+#include <lz4/lz4.h>
 
-void writeLevelJson(const std::string& name, const CYLevel& level) {
+/**
+    Writes a CY Level as JSON
+
+    t = texture
+    p = position
+    f = floor
+    pr = properties
+*/
+void writeLevelJson(const std::string& name, const CYLevel& level)
+{
     nlohmann::json json;
     json["name"] = level.name;
-    json["by"] = level.creator;
-    json["v"] = level.version;
+    json["author"] = level.creator;
+    json["version"] = level.version;
     json["floors"] = level.numFloors;
     json["theme"] = level.theme;
     json["music"] = level.backmusic;
@@ -29,18 +39,15 @@ void writeLevelJson(const std::string& name, const CYLevel& level) {
     nlohmann::json floors = nlohmann::json::array();
     for (const auto& floor : level.floors) {
         nlohmann::json jsonFloor;
-        jsonFloor["tex"] = {
-            {"top", floor.topTexture->asString()},
-            {"bottom", floor.bottomTexture->asString()}
-        };
-        jsonFloor["pos"] = {
-            {"1", {{"x", floor.vertexA.x}, {"y", floor.vertexA.z}}},
-            {"2", {{"x", floor.vertexB.x}, {"y", floor.vertexB.z}}},
-            {"3", {{"x", floor.vertexC.x}, {"y", floor.vertexC.z}}},
-            {"4", {{"x", floor.vertexD.x}, {"y", floor.vertexD.z}}}
-        };
+        jsonFloor["texture"] = nlohmann::json::array(
+            {floor.topTexture->asString(), floor.bottomTexture->asString()});
+
+        jsonFloor["position"] = nlohmann::json::array(
+            {floor.vertexA.x, floor.vertexA.z, floor.vertexB.x, floor.vertexB.z,
+             floor.vertexC.x, floor.vertexC.z, floor.vertexD.x, floor.vertexD.z});
+
         jsonFloor["floor"] = floor.floor;
-        jsonFloor["vis"] = floor.isVisible;
+        jsonFloor["properties"] = floor.isVisible;
 
         floors.push_back(jsonFloor);
     }
@@ -52,18 +59,16 @@ void writeLevelJson(const std::string& name, const CYLevel& level) {
     nlohmann::json walls = nlohmann::json::array();
     for (const auto& wall : level.walls) {
         nlohmann::json jsonWall;
-        jsonWall["tex"] = {
-            {"front", wall.frontTexture->asString()},
-            {"back", wall.backTexture->asString()}
-        };
-        jsonWall["pos"] = {
-            {"begin", {{"x", wall.beginPoint.x}, {"y", wall.beginPoint.z}}},
-            {"end", {{"x", wall.endPoint.x}, {"y", wall.endPoint.z}}},
-        };
+        jsonWall["texture"] = nlohmann::json::array(
+            {wall.frontTexture->asString(), wall.backTexture->asString()});
+
+        jsonWall["position"] = nlohmann::json::array(
+            {wall.beginPoint.x, wall.beginPoint.z, wall.endPoint.x, wall.endPoint.z});
+
         jsonWall["floor"] = wall.floor;
-        jsonWall["props"] = nlohmann::json::array();
+        jsonWall["properties"] = nlohmann::json::array();
         for (const auto& p : wall.properties) {
-            jsonWall["props"].push_back(p);
+            jsonWall["properties"].push_back(p);
         }
         walls.push_back(jsonWall);
     }
@@ -77,10 +82,11 @@ void writeLevelJson(const std::string& name, const CYLevel& level) {
         for (const auto& obj : level.objects[i]) {
             nlohmann::json jsonObj;
             jsonObj["floor"] = obj.floor;
-            jsonObj["pos"] = { { "x", obj.position.x }, { "y", obj.position.z } };
-            jsonObj["props"] = nlohmann::json::array();
+            jsonObj["position"] = nlohmann::json::array({obj.position.x, obj.position.z});
+
+            jsonObj["properties"] = nlohmann::json::array();
             for (const auto& p : obj.properties) {
-                jsonObj["props"].push_back(p);
+                jsonObj["properties"].push_back(p);
             }
             if (hasTexture((ObjectID)i)) {
                 jsonObj["texture"] = obj.texture->asString();
@@ -90,42 +96,61 @@ void writeLevelJson(const std::string& name, const CYLevel& level) {
         json["lvl"]["obj_" + std::to_string(i)] = objects;
     }
 
-    std::ofstream outfile(OUT + name + ".json");
-    outfile << json.dump();
+    auto data = json.dump();
+
+    const char* const source = data.c_str();
+    int size = (int)(std::strlen(source) + 1);
+    int maxSize = LZ4_compressBound(size);
+    char* compressed = new char[maxSize];
+    if (!compressed) {
+        std::cout << "Failed to allocate...";
+        return;
+    }
+    int compressedSize = LZ4_compress_default(source, compressed, size, maxSize);
+    if (compressedSize <= 0) {
+        std::cout << "Failed to compress...";
+        return;
+    }
+
+    std::ofstream bin(OUT + name + ".json.lz4", std::ios::binary);
+    bin.write(compressed, compressedSize);
+    delete[] compressed;
 }
 
-//This is tempory for testing, will be changed later
-void writeLevel(const std::string& name, const CYLevel& level) {
+// This is tempory for testing, will be changed later
+void writeLevel(const std::string& name, const CYLevel& level)
+{
     std::ofstream outfile(OUT + name + ".out");
     outfile << "Name:    " << level.name << '\n'
-        << "Author:  " << level.creator << '\n'
-        << "Version: " << level.version << '\n'
-        << "Floors:  " << level.numFloors << '\n'
-        << "Theme:   " << level.theme << '\n'
-        << "Music:   " << level.backmusic << '\n'
-        << "Weather: " << level.weather << '\n';
+            << "Author:  " << level.creator << '\n'
+            << "Version: " << level.version << '\n'
+            << "Floors:  " << level.numFloors << '\n'
+            << "Theme:   " << level.theme << '\n'
+            << "Music:   " << level.backmusic << '\n'
+            << "Weather: " << level.weather << '\n';
 
     outfile << "Floors\n";
     for (const auto& floor : level.floors) {
         outfile << "\tVertex 1:   " << floor.vertexA.x << " " << floor.vertexA.z << '\n'
-            << "\tVertex 2:   " << floor.vertexB.x << " " << floor.vertexB.z << '\n'
-            << "\tVertex 3:   " << floor.vertexC.x << " " << floor.vertexC.z << '\n'
-            << "\tVertex 4:   " << floor.vertexD.x << " " << floor.vertexD.z << '\n'
-            << "\tFloor:      " << (int)floor.floor << '\n'
-            << "\tTex Top:    " << floor.topTexture->asString() << '\n'
-            << "\tTex Bottom: " << floor.topTexture->asString() << '\n'
-            << "\tVisible: " << (int)floor.isVisible << '\n';
+                << "\tVertex 2:   " << floor.vertexB.x << " " << floor.vertexB.z << '\n'
+                << "\tVertex 3:   " << floor.vertexC.x << " " << floor.vertexC.z << '\n'
+                << "\tVertex 4:   " << floor.vertexD.x << " " << floor.vertexD.z << '\n'
+                << "\tFloor:      " << (int)floor.floor << '\n'
+                << "\tTex Top:    " << floor.topTexture->asString() << '\n'
+                << "\tTex Bottom: " << floor.topTexture->asString() << '\n'
+                << "\tVisible: " << (int)floor.isVisible << '\n';
         outfile << "\n";
     }
 
     outfile << "Walls\n";
     for (const auto& wall : level.walls) {
-        outfile << "\tBegin:      " << wall.beginPoint.x << " " << wall.beginPoint.z << '\n'
-            << "\tEnd:        " << wall.endPoint.x << " " << wall.endPoint.z << '\n'
-            << "\tFloor:      " << (int)wall.floor << '\n'
-            << "\tTex Front:  " << wall.frontTexture->asString() << '\n'
-            << "\tTex Back:   " << wall.backTexture->asString() << '\n'
-            << "\tProperties: ";
+        outfile << "\tBegin:      " << wall.beginPoint.x << " " << wall.beginPoint.z
+                << '\n'
+                << "\tEnd:        " << wall.endPoint.x << " " << wall.endPoint.z << '\n'
+                << "\tFloor:      " << (int)wall.floor << '\n'
+                << "\tTex Front:  " << wall.frontTexture->asString() << '\n'
+                << "\tTex Back:   " << wall.backTexture->asString() << '\n'
+                << "\tProperties: ";
         for (const auto& p : wall.properties) {
             outfile << p << ' ';
         }
@@ -136,8 +161,8 @@ void writeLevel(const std::string& name, const CYLevel& level) {
         outfile << "Object ID: " << i << '\n';
         for (const auto& obj : level.objects[i]) {
             outfile << "\tPosition:   " << obj.position.x << " " << obj.position.z << '\n'
-                << "\tFloor:      " << (int)obj.floor << '\n'
-                << "\tProperties: ";
+                    << "\tFloor:      " << (int)obj.floor << '\n'
+                    << "\tProperties: ";
             for (const auto& p : obj.properties) {
                 if (i == (int)ObjectID::Message) {
                     outfile << "\n\tMessage Prop: " << p;
@@ -154,41 +179,42 @@ void writeLevel(const std::string& name, const CYLevel& level) {
     }
 }
 
-std::optional<CYLevel> readFile(const std::string& name) {
+std::optional<CYLevel> readFile(const std::string& name)
+{
     return parseFile(name.c_str());
 }
 
-void testLocal(const std::string& name) {
+void testLocal(const std::string& name)
+{
+    benchmark::Timer<> timer;
     std::string path = "games/" + name;
-    std::cout << path << std::endl;
+   // std::cout << path << std::endl;
     auto level = parseFile(path);
     if (level) {
-        std::cout << "Writing level!\n";
-        writeLevel(name, *level);
+       // std::cout << "Writing level!\n";
+        //writeLevel(name, *level);
         writeLevelJson(name, *level);
     }
+    std::cout << name << ' ' << timer.getTime() << "ms" << std::endl;
 }
 
-int main() {
+int main()
+{
+    benchmark::Timer<> timer;
     for (const auto& path : fs::directory_iterator("games/")) {
         testLocal(path.path().filename().string());
     }
+    std::cout << "TOTAL TIME: " << timer.getTime() << "ms" << std::endl;
 
     /*
 #ifndef USE_SAMPLE_GAMES
     benchmark::Timer<> timer;
-    const int percentIncrement = std::distance(getGamesDirectoryItr(), fs::directory_iterator{}) / 100;
-    int count = 0;
-    int progress = 0;
-    std::cout << "Total files: " << percentIncrement * 100 << std::endl;
-    timer.reset();
-#endif
-    for (const auto& path : getGamesDirectoryItr()) {
-#ifndef USE_SAMPLE_GAMES
-        if (++count % percentIncrement == 0) {
-            printf("Progress: %d%% [%d out of %d games converted] ", ++progress, count, percentIncrement * 100);
-            printf("[Time: %fms]\n", timer.getTime());
-            timer.reset();
+    const int percentIncrement = std::distance(getGamesDirectoryItr(),
+fs::directory_iterator{}) / 100; int count = 0; int progress = 0; std::cout << "Total
+files: " << percentIncrement * 100 << std::endl; timer.reset(); #endif for (const auto&
+path : getGamesDirectoryItr()) { #ifndef USE_SAMPLE_GAMES if (++count % percentIncrement
+== 0) { printf("Progress: %d%% [%d out of %d games converted] ", ++progress, count,
+percentIncrement * 100); printf("[Time: %fms]\n", timer.getTime()); timer.reset();
         }
 #endif
         const std::string name = path.path().filename().string();
