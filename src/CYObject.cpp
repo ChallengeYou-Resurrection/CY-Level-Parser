@@ -16,76 +16,66 @@ namespace {
 void CYObject::verifyPropertyCount(ObjectID id) {
     int propCount = properties.size();
 
-    switch(id) {
-        case ObjectID::Platform:
-            switch(propCount) {
-                case 1:
-                    addFrontProp(properties);
-                case 2: //Fallthrough is intentional
-                    addBackProp(properties);
-            }
-            break;
+    switch (id) {
+    case ObjectID::Platform:
+        switch (propCount) {
+        case 1:
+            addFrontProp(properties);
+        case 2: //Fallthrough is intentional
+            addBackProp(properties);
+        }
+        break;
 
-        case ObjectID::Finish:
-            switch (propCount) {
-                case 2:
-                    properties.erase(properties.begin());
-                    break;
-            }
-            break;
-        case ObjectID::Diamond:
-        case ObjectID::Iceman:
-        case ObjectID::Ramp:
-            switch (propCount) {
-                case 1:
-                    addBackProp(properties);
-                    break;
-            }
-            break;
+    case ObjectID::Finish:
+        if (propCount == 2) {
+            properties.erase(properties.begin());
+        }
+        break;
+    case ObjectID::Diamond:
+    case ObjectID::Iceman:
+    case ObjectID::Ramp:
+        if (propCount == 1) {
+            addBackProp(properties);
+        }
+        break;
 
-        case ObjectID::Message:
-        case ObjectID::DiaPlatform:
-        case ObjectID::Door:
-            switch (propCount) {
-                case 2:
-                    addBackProp(properties);
-                    break;
-            }
-            break;
+    case ObjectID::Message:
+    case ObjectID::DiaPlatform:
+    case ObjectID::Door:
+        if (propCount == 2) {
+            addBackProp(properties);
+        }
+        break;
 
-        case ObjectID::Pillar:
-            switch (propCount) {
-                case 1:
-                    addBackProp(properties);
-                    addBackProp(properties);
-                    addBackProp(properties);
-                    break;
-            }
-            break;
+    case ObjectID::Pillar:
+        if (propCount == 1) {
+            addBackProp(properties);
+            addBackProp(properties);
+            addBackProp(properties);
+        }
+        break;
 
-        case ObjectID::TriPlatform:
-            switch(propCount) {
-                case 3:
-                    addBackProp(properties);
-                    break;
-            }
-            break;
+    case ObjectID::TriPlatform:
+        if (propCount == 3) {
+            addBackProp(properties);
+        }
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 }
 
 void CYWall::verifyPropertyCount() {
     switch (properties.size()) {
-        case 2:
-            addBackProp(properties);
-            break;
+    case 2:
+        addBackProp(properties);
+        break;
     }
 }
 
 ObjectID stringToObjectID(const std::string& objectName) {
-    const static std::unordered_map<std::string, ObjectID> objects {
+    const static std::unordered_map<std::string, ObjectID> objects{
         {"walls",       ObjectID::Wall          },
         {"floor",       ObjectID::Floor         },
         {"plat",        ObjectID::Platform      },
@@ -95,6 +85,7 @@ ObjectID stringToObjectID(const std::string& objectName) {
         {"triwall",     ObjectID::TriPlatform   },
         {"pillar",      ObjectID::Pillar        },
         {"door",        ObjectID::Door          },
+
         {"diamond",     ObjectID::Diamond       },
         {"monster",     ObjectID::Iceman        },
         {"chaser",      ObjectID::Chaser        },
@@ -109,6 +100,7 @@ ObjectID stringToObjectID(const std::string& objectName) {
         {"teleport",    ObjectID::Teleport      },
         {"key2",        ObjectID::Key           },
         {"ladder",      ObjectID::Ladder        },
+
         {"portal",      ObjectID::Portal        },
         {"board",       ObjectID::Message       },
 
@@ -120,16 +112,18 @@ ObjectID stringToObjectID(const std::string& objectName) {
     return objects.at(objectName);
 }
 
+/*
 void CYFloor::serialize(BinaryFileBuffer& buffer) const {
-    buffer  << vertexA << vertexB << vertexC << vertexD << floor 
-            << (u32)std::stoul(properties[0]) 
-            << (u32)std::stoul(properties[2]) 
-            << (u8 )std::stoi(properties[1]);
+    buffer << vertexA << vertexB << vertexC << vertexD << floor
+        << (u32)std::stoul(properties[0])
+        << (u32)std::stoul(properties[2])
+        << (u8)std::stoi(properties[1]);
 }
 
 void CYWall::serialize(BinaryFileBuffer& buffer) const {
-    buffer  << beginPoint << endPoint << floor
-            << (u32)std::stoul(properties[0]) 
-            << (u32)std::stoul(properties[1]) 
-            << (u8 )std::stoi(properties[2]);
+    buffer << beginPoint << endPoint << floor
+        << (u32)std::stoul(properties[0])
+        << (u32)std::stoul(properties[1])
+        << (u8)std::stoi(properties[2]);
 }
+*/

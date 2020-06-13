@@ -4,11 +4,11 @@
 
 #include "Utilities.h"
 
-size_t getFileLength(const char* fileName) {
+size_t getFileLength(const std::string& fileName) {
     return std::ifstream(fileName, std::ifstream::binary | std::ifstream::ate).tellg();
 }
 
-std::string getFileContent(const char* fileName) {
+std::string getFileContent(const std::string& fileName) {
     std::fstream inFile(fileName);
     if (!inFile.is_open()) return "";
     std::string fileContent;

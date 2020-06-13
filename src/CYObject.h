@@ -4,42 +4,12 @@
 #include <unordered_map>
 #include <map>
 #include <vector>
+#include <memory>
+#include <array>
 
 #include "BinaryFile.h"
-
-enum class ObjectID : uint8_t {
-    Chaser		    = 0,
-    Crumbs		    = 1,
-    DiaPlatform		= 2,
-    Diamond		    = 3,
-    Door		    = 4,
-    Finish		    = 5,
-    Floor		    = 6,
-    Fuel		    = 7,
-    Hole		    = 8,
-    Iceman		    = 9,
-    JetPack		    = 10,
-    Key		        = 11,
-    Ladder		    = 12,
-    Message		    = 13,
-    Pillar		    = 14,
-    Platform	    = 15,
-    Portal		    = 16,
-    Ramp		    = 17,
-    Shield		    = 18,
-    Slingshot	    = 19,
-    Start		    = 20,
-    Teleport	    = 21,
-    TriPlatform 	= 22,
-    TriWall		    = 23,
-    Wall		    = 24,
-    NUM_OBJECTS     = 25,
-    
-    Theme		    = 250,
-    Weather		    = 251,
-    Music		    = 252,
-    Unknown		    = 253,
-};
+#include "CYEnums.h"
+#include "TextureConverter.h"
 
 /**
  * @brief X/Z coordinates
@@ -59,8 +29,10 @@ struct CYFloor {
     Position vertexB;
     Position vertexC;
     Position vertexD;
+    std::unique_ptr<Texture> topTexture;
+    std::unique_ptr<Texture> bottomTexture;
     uint8_t floor;
-    std::vector<std::string> properties;
+    bool isVisible = true;
 
     void serialize(BinaryFileBuffer& buffer) const;
 };
@@ -70,6 +42,10 @@ struct CYWall {
     Position endPoint;
     std::vector<std::string> properties;
     uint8_t floor;
+
+    std::unique_ptr<Texture> backTexture;
+    std::unique_ptr<Texture> frontTexture;
+
 
     void serialize(BinaryFileBuffer& buffer) const;
     void verifyPropertyCount();
@@ -82,6 +58,8 @@ struct CYWall {
 struct CYObject {
     Position position; 
     uint8_t floor;
+
+    std::unique_ptr<Texture> texture;
 
     std::vector<std::string> properties;
 

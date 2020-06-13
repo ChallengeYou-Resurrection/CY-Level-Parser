@@ -1,35 +1,36 @@
 #pragma once
 
 #include <string>
-#include "CYObject.h"
+#include <memory>
+#include "CYEnums.h"
 
-//This is not an enum class because of colour textures are represented using 32bits for RGBT
-//where T is just 255 in binary to ID this is a texure
-//Layout for colours: RRRRRRRRGGGGGGGGBBBBBBBB11111111
-namespace TextureID {
-    enum : uint32_t  {
-        // Normal Textures
-        Grass = 1,
-        Stucco = 2,
-        Brick = 3,
-        Stone = 4,
-        Wood = 5,
-        Happy = 6,
-        Egypt = 7,
-        Bark = 8,
-        Scifi = 9,
-        Tile = 10,
-        Rock = 11,
-        Parquet = 12,
-        Books = 13,
+struct Texture {
+    virtual std::string asString() = 0;
+};
 
-        // Translucent Textures
-        Bars = 14,
-        Glass = 15,
-        None = 16,
-        Unknown = 17
-    };
-}
+struct TextureNormal : public Texture {
+    TextureNormal(int textureId)
+        : id(textureId) 
+    {}
 
-bool hasTexture     (ObjectID id);
-uint32_t convertTexture  (ObjectID object, const std::string& texture);
+    int id;
+
+    std::string asString() override;
+};
+
+struct TextureColour : public Texture {
+    TextureColour(int red, int green, int blue)
+        : r(red)
+        , g(green)
+        , b(blue)
+    {}
+
+    int r;
+    int g;
+    int b;
+
+    std::string asString() override;
+};
+
+bool hasTexture(ObjectID id);
+std::unique_ptr<Texture> convertTexture(ObjectID object, const std::string& texture);

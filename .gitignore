@@ -27,3 +27,12 @@ test_out/
 
 single/
 single_out/
+
+.vs 
+Release/
+Debug/
+*.sln 
+*.user
+*.filters
+*.vcxproj
+

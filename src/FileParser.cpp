@@ -130,7 +130,7 @@ namespace {
     }
 }
 
-std::optional<CYLevel> parseFile(const char* fileName) {
+std::optional<CYLevel> parseFile(const std::string& fileName) {
     CYLevel level;
     auto content = getFileContent(fileName);
     content.pop_back();
@@ -240,11 +240,12 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     floor.vertexB = extractPosition(getMatchSection(s[i + 1], d));
                     floor.vertexC = extractPosition(getMatchSection(s[i + 2], d));
                     floor.vertexD = extractPosition(getMatchSection(s[i + 3], d));
-                    floor.properties = extractProperties(d.substr(s[i + 6].first, s[i + 6].second));
-                    floor.properties[0] = std::to_string(convertTexture(objId, floor.properties[0]));
-                    floor.properties[2] = std::to_string(convertTexture(objId, floor.properties[2]));
+                    auto properties = extractProperties(d.substr(s[i + 6].first, s[i + 6].second));
+                    floor.topTexture = convertTexture(objId, properties[0]);
+                    floor.bottomTexture = convertTexture(objId, properties[2]);
+                    floor.isVisible = std::stoi(properties[1]);
                     floor.floor = ++floorNumber;
-                    floors.push_back(floor);
+                    floors.push_back(std::move(floor));
                 }
                 level.floors = std::move(floors);
             }break;
@@ -268,17 +269,19 @@ std::optional<CYLevel> parseFile(const char* fileName) {
                     int zBegin  = std::stoi(tokens[3]);
 
                     auto props = extractProperties(d.substr(s[i].first, s[i].second));
-                    props[0] = std::to_string(convertTexture(objId, props[0]));
-                    props[1] = std::to_string(convertTexture(objId, props[1]));
 
                     CYWall wall;
+                    wall.frontTexture = convertTexture(objId, props[0]);
+                    wall.backTexture = convertTexture(objId, props[1]);
                     wall.beginPoint = {xBegin,              zBegin};
                     wall.endPoint   = {xBegin + xOffset,    zBegin + zOffset};
                     wall.properties = props;
                     wall.floor      = std::stoi(tokens.back());
                     wall.verifyPropertyCount();
+                    wall.properties.erase(wall.properties.begin());
+                    wall.properties.erase(wall.properties.begin());
 
-                    walls.push_back(wall);
+                    walls.push_back(std::move(wall));
                 }
                 level.walls = std::move(walls);
             }break;
@@ -345,15 +348,17 @@ std::optional<CYLevel> parseFile(const char* fileName) {
 
                     if (hasTexture(objId)) {
                         if (objId == ObjectID::Door) {
-                            object.properties[2] = std::to_string(convertTexture(objId, object.properties[2]));
+                            object.texture = convertTexture(objId, object.properties[2]);
+                            object.properties.pop_back();
                         } else {
-                            object.properties[1] = std::to_string(convertTexture(objId, object.properties[1]));
+                            object.texture = convertTexture(objId, object.properties[1]);
+                            object.properties.erase(object.properties.begin() + 1);
                         }
                         if (objId == ObjectID::DiaPlatform) {
                         }
                     }
 
-                    objects.push_back(object);
+                    objects.push_back(std::move(object));
                 }
                 switch (objId) {
                     case ObjectID::Music:

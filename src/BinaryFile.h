@@ -45,7 +45,7 @@ class BinaryFileBuffer {
 
         template<typename T>
         friend BinaryFileBuffer& operator <<(BinaryFileBuffer& buff, const T& object) {
-            object.serialize(buff);
+            //object.serialize(buff);
             return buff;
         }
 

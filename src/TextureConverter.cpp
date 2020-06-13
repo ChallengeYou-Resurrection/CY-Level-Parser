@@ -9,20 +9,22 @@
 #include "Utilities.h"
 
 namespace {
-    using ConvertFunction = std::function<int32_t(int)>;
-
     bool isColourTexture(const std::string& texture) {
         return texture.find("color") != std::string::npos;
     }
 
-    uint32_t colourToInt(const std::string& texture) {
+    std::unique_ptr<Texture> colourToInt(const std::string& texture) {
         auto colours = split(texture, ',');
         colours[0] = colours[0].substr(6);
         colours[2].pop_back();
-        auto r = (u8)std::stoi(colours[0]);
-        auto g = (u8)std::stoi(colours[1]);
-        auto b = (u8)std::stoi(colours[2]);
-        return (r << 24) | (g << 16) | (b << 8) | 0xFF;
+        auto r = std::stoi(colours[0]);
+        auto g = std::stoi(colours[1]);
+        auto b = std::stoi(colours[2]);
+        return std::make_unique<TextureColour>(r, g, b);
+
+
+        // for binary fomat only, note: r, g, and b MUST BE CONVERTED TO 8 BIT UNSIGNED FIRST
+        //return (r << 24) | (g << 16) | (b << 8) | 0xFF;
     }
 
     uint32_t convertWallTexture(int texture) {
@@ -85,7 +87,7 @@ bool hasTexture(ObjectID id) {
 }
 
 
-uint32_t convertTexture(ObjectID object, const std::string& texture) {
+std::unique_ptr<Texture> convertTexture(ObjectID object, const std::string& texture) {
     if (isColourTexture(texture)) {
         return colourToInt(texture);
     }
@@ -95,18 +97,28 @@ uint32_t convertTexture(ObjectID object, const std::string& texture) {
         case ObjectID::Pillar:
         case ObjectID::Door:
         case ObjectID::TriWall:
-            return convertWallTexture(std::stoul(texture));
+            return std::make_unique<TextureNormal>(convertWallTexture(std::stoul(texture)));
 
         case ObjectID::Floor:
         case ObjectID::Platform:
         case ObjectID::TriPlatform:
         case ObjectID::DiaPlatform:
         case ObjectID::Ramp:
-            return convertPlatformTexture(std::stoul(texture));
+            return std::make_unique<TextureNormal>(convertPlatformTexture(std::stoul(texture)));
 
         default:
             std::cerr << "UNKNOWN OBEJCT";
-            return TextureID::Unknown;
+            return std::make_unique<TextureNormal>(TextureID::Unknown);
     }
 
+}
+
+std::string TextureColour::asString()
+{
+    return std::string("c ") + std::to_string(r) + " " + std::to_string(g) + " " + std::to_string(b);
+}
+
+std::string TextureNormal::asString()
+{
+    return std::string("t ") + std::to_string(id);
 }

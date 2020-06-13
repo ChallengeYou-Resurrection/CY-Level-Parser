@@ -12,7 +12,7 @@
  * @param fileName The name of the file to get the length of
  * @return size_t The length of the file
  */
-size_t getFileLength(const char* fileName);
+size_t getFileLength(const std::string& fileName);
 
 /**
  * @brief Get the contents from a file
@@ -20,7 +20,7 @@ size_t getFileLength(const char* fileName);
  * @param fileName The name of the file to get the contents from
  * @return std::string String containing everything inside of this file
  */
-std::string getFileContent(const char* fileName);
+std::string getFileContent(const std::string& fileName);
 
 /**
  * @brief Gets the position of the first instance of 'token' in 'string'
