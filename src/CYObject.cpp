@@ -102,23 +102,39 @@ ObjectID stringToObjectID(const std::string& objectName)
 
 const char* objectIdToString(ObjectID id)
 {
+    // clang-format off
     const static std::unordered_map<ObjectID, const char*> objects{
-        {ObjectID::Wall, "walls"},          {ObjectID::Floor, "floor"},
-        {ObjectID::Platform, "plat"},       {ObjectID::TriPlatform, "triplat"},
-        {ObjectID::DiaPlatform, "diaplat"}, {ObjectID::Ramp, "ramp"},
-        {ObjectID::TriWall, "triwall"}, {ObjectID::Pillar, "pillar"},
-        {ObjectID::Door, "door"},           {ObjectID::Diamond, "diamond"},
-        {ObjectID::Iceman, "monster"},      {ObjectID::Chaser, "chaser"},
-        {ObjectID::Hole, "hole"},           {ObjectID::Start, "begin"},
-        {ObjectID::Finish, "finish"},       {ObjectID::JetPack, "jetpack"},
-        {ObjectID::Fuel, "fuel"},           {ObjectID::Shield, "shield"},
-        {ObjectID::Slingshot, "slingshot"}, {ObjectID::Crumbs, "crumbs"},
-        {ObjectID::Teleport, "teleport"},   {ObjectID::Key, "key2"},
-        {ObjectID::Ladder, "ladder"},       {ObjectID::Portal, "portal"},
-        {ObjectID::Message, "board"},       {ObjectID::Music, "backmusic"},
-        {ObjectID::Weather, "weather"},     {ObjectID::Theme, "theme"},
-        {ObjectID::Unknown, "flight"},
+        {ObjectID::Wall,        "Wall"},          
+        {ObjectID::Floor,       "Level Ground"},
+        {ObjectID::Platform,    "Platform"},       
+        {ObjectID::TriPlatform, "Platform"},
+        {ObjectID::DiaPlatform, "Platform"}, 
+        {ObjectID::Ramp,        "Ramp"},
+        {ObjectID::TriWall,     "triwall"}, 
+        {ObjectID::Pillar,      "Pillar"},
+        {ObjectID::Door,        "door"},           
+        {ObjectID::Diamond,     "diamond"},
+        {ObjectID::Iceman,      "monster"},      
+        {ObjectID::Chaser,      "chaser"},
+        {ObjectID::Hole,        "Hole"},           
+        {ObjectID::Start,       "Spawn Location"},
+        {ObjectID::Finish,      "finish"},       
+        {ObjectID::JetPack,     "jetpack"},
+        {ObjectID::Fuel,        "fuel"},           
+        {ObjectID::Shield,      "shield"},
+        {ObjectID::Slingshot,   "slingshot"}, 
+        {ObjectID::Crumbs,      "crumbs"},
+        {ObjectID::Teleport,    "teleport"},   
+        {ObjectID::Key,         "key2"},
+        {ObjectID::Ladder,      "ladder"},       
+        {ObjectID::Portal,      "portal"},
+        {ObjectID::Message,     "board"},       
+        {ObjectID::Music,       "backmusic"},
+        {ObjectID::Weather,     "weather"},     
+        {ObjectID::Theme,       "theme"},
+        {ObjectID::Unknown,     "flight"},
     };
+    // clang-format on
     return objects.at(id);
 }
 

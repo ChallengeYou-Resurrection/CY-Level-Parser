@@ -29,8 +29,8 @@ struct CYFloor {
     Position vertexB;
     Position vertexC;
     Position vertexD;
-    std::unique_ptr<Texture> topTexture;
-    std::unique_ptr<Texture> bottomTexture;
+    Texture topTexture;
+    Texture bottomTexture;
     uint8_t floor;
     bool isVisible = true;
 
@@ -43,8 +43,8 @@ struct CYWall {
     std::vector<std::string> properties;
     uint8_t floor;
 
-    std::unique_ptr<Texture> backTexture;
-    std::unique_ptr<Texture> frontTexture;
+    Texture backTexture;
+    Texture frontTexture;
 
 
     void serialize(BinaryFileBuffer& buffer) const;
@@ -59,7 +59,7 @@ struct CYObject {
     Position position; 
     uint8_t floor;
 
-    std::unique_ptr<Texture> texture;
+    Texture texture;
 
     std::vector<std::string> properties;
 

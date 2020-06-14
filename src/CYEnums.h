@@ -42,6 +42,7 @@ enum class ObjectID : uint8_t {
 //Layout for colours: RRRRRRRRGGGGGGGGBBBBBBBB11111111
 enum TextureID : uint32_t {
     // Normal Textures
+    Colour = 0,
     Grass = 1,
     Stucco = 2,
     Brick = 3,
