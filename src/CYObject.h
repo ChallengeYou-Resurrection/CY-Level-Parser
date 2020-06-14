@@ -87,3 +87,4 @@ struct CYLevel {
 };
 
 ObjectID stringToObjectID(const std::string& objectName);
+const char* objectIdToString(ObjectID id);

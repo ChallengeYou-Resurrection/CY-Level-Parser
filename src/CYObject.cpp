@@ -1,115 +1,125 @@
 #include "CYObject.h"
 
-#include <unordered_map>
 #include <iostream>
+#include <unordered_map>
 
 namespace {
-    void addBackProp(std::vector<std::string>& propList) {
+    void addBackProp(std::vector<std::string>& propList)
+    {
         propList.push_back("1");
     }
 
-    void addFrontProp(std::vector<std::string>& propList) {
+    void addFrontProp(std::vector<std::string>& propList)
+    {
         propList.insert(propList.begin(), "1");
     }
-}
+} // namespace
 
-void CYObject::verifyPropertyCount(ObjectID id) {
+void CYObject::verifyPropertyCount(ObjectID id)
+{
     int propCount = properties.size();
 
     switch (id) {
-    case ObjectID::Platform:
-        switch (propCount) {
-        case 1:
-            addFrontProp(properties);
-        case 2: //Fallthrough is intentional
-            addBackProp(properties);
-        }
-        break;
+        case ObjectID::Platform:
+            switch (propCount) {
+                case 1:
+                    addFrontProp(properties);
+                case 2: // Fallthrough is intentional
+                    addBackProp(properties);
+            }
+            break;
 
-    case ObjectID::Finish:
-        if (propCount == 2) {
-            properties.erase(properties.begin());
-        }
-        break;
-    case ObjectID::Diamond:
-    case ObjectID::Iceman:
-    case ObjectID::Ramp:
-        if (propCount == 1) {
-            addBackProp(properties);
-        }
-        break;
+        case ObjectID::Finish:
+            if (propCount == 2) {
+                properties.erase(properties.begin());
+            }
+            break;
+        case ObjectID::Diamond:
+        case ObjectID::Iceman:
+        case ObjectID::Ramp:
+            if (propCount == 1) {
+                addBackProp(properties);
+            }
+            break;
 
-    case ObjectID::Message:
-    case ObjectID::DiaPlatform:
-    case ObjectID::Door:
-        if (propCount == 2) {
-            addBackProp(properties);
-        }
-        break;
+        case ObjectID::Message:
+        case ObjectID::DiaPlatform:
+        case ObjectID::Door:
+            if (propCount == 2) {
+                addBackProp(properties);
+            }
+            break;
 
-    case ObjectID::Pillar:
-        if (propCount == 1) {
-            addBackProp(properties);
-            addBackProp(properties);
-            addBackProp(properties);
-        }
-        break;
+        case ObjectID::Pillar:
+            if (propCount == 1) {
+                addBackProp(properties);
+                addBackProp(properties);
+                addBackProp(properties);
+            }
+            break;
 
-    case ObjectID::TriPlatform:
-        if (propCount == 3) {
-            addBackProp(properties);
-        }
-        break;
+        case ObjectID::TriPlatform:
+            if (propCount == 3) {
+                addBackProp(properties);
+            }
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 }
 
-void CYWall::verifyPropertyCount() {
+void CYWall::verifyPropertyCount()
+{
     switch (properties.size()) {
-    case 2:
-        addBackProp(properties);
-        break;
+        case 2:
+            addBackProp(properties);
+            break;
     }
 }
 
-ObjectID stringToObjectID(const std::string& objectName) {
+ObjectID stringToObjectID(const std::string& objectName)
+{
     const static std::unordered_map<std::string, ObjectID> objects{
-        {"walls",       ObjectID::Wall          },
-        {"floor",       ObjectID::Floor         },
-        {"plat",        ObjectID::Platform      },
-        {"triplat",     ObjectID::TriPlatform   },
-        {"diaplat",     ObjectID::DiaPlatform   },
-        {"ramp",        ObjectID::Ramp          },
-        {"triwall",     ObjectID::TriPlatform   },
-        {"pillar",      ObjectID::Pillar        },
-        {"door",        ObjectID::Door          },
-
-        {"diamond",     ObjectID::Diamond       },
-        {"monster",     ObjectID::Iceman        },
-        {"chaser",      ObjectID::Chaser        },
-        {"hole",        ObjectID::Hole          },
-        {"begin",       ObjectID::Start         },
-        {"finish",      ObjectID::Finish        },
-        {"jetpack",     ObjectID::JetPack       },
-        {"fuel",        ObjectID::Fuel          },
-        {"shield",      ObjectID::Shield        },
-        {"slingshot",   ObjectID::Slingshot     },
-        {"crumbs",      ObjectID::Crumbs        },
-        {"teleport",    ObjectID::Teleport      },
-        {"key2",        ObjectID::Key           },
-        {"ladder",      ObjectID::Ladder        },
-
-        {"portal",      ObjectID::Portal        },
-        {"board",       ObjectID::Message       },
-
-        {"backmusic",   ObjectID::Music         },
-        {"weather",     ObjectID::Weather       },
-        {"theme",       ObjectID::Theme         },
-        {"flight",      ObjectID::Unknown       },
+        {"walls", ObjectID::Wall},          {"floor", ObjectID::Floor},
+        {"plat", ObjectID::Platform},       {"triplat", ObjectID::TriPlatform},
+        {"diaplat", ObjectID::DiaPlatform}, {"ramp", ObjectID::Ramp},
+        {"triwall", ObjectID::TriWall}, {"pillar", ObjectID::Pillar},
+        {"door", ObjectID::Door},           {"diamond", ObjectID::Diamond},
+        {"monster", ObjectID::Iceman},      {"chaser", ObjectID::Chaser},
+        {"hole", ObjectID::Hole},           {"begin", ObjectID::Start},
+        {"finish", ObjectID::Finish},       {"jetpack", ObjectID::JetPack},
+        {"fuel", ObjectID::Fuel},           {"shield", ObjectID::Shield},
+        {"slingshot", ObjectID::Slingshot}, {"crumbs", ObjectID::Crumbs},
+        {"teleport", ObjectID::Teleport},   {"key2", ObjectID::Key},
+        {"ladder", ObjectID::Ladder},       {"portal", ObjectID::Portal},
+        {"board", ObjectID::Message},       {"backmusic", ObjectID::Music},
+        {"weather", ObjectID::Weather},     {"theme", ObjectID::Theme},
+        {"flight", ObjectID::Unknown},
     };
     return objects.at(objectName);
+}
+
+const char* objectIdToString(ObjectID id)
+{
+    const static std::unordered_map<ObjectID, const char*> objects{
+        {ObjectID::Wall, "walls"},          {ObjectID::Floor, "floor"},
+        {ObjectID::Platform, "plat"},       {ObjectID::TriPlatform, "triplat"},
+        {ObjectID::DiaPlatform, "diaplat"}, {ObjectID::Ramp, "ramp"},
+        {ObjectID::TriWall, "triwall"}, {ObjectID::Pillar, "pillar"},
+        {ObjectID::Door, "door"},           {ObjectID::Diamond, "diamond"},
+        {ObjectID::Iceman, "monster"},      {ObjectID::Chaser, "chaser"},
+        {ObjectID::Hole, "hole"},           {ObjectID::Start, "begin"},
+        {ObjectID::Finish, "finish"},       {ObjectID::JetPack, "jetpack"},
+        {ObjectID::Fuel, "fuel"},           {ObjectID::Shield, "shield"},
+        {ObjectID::Slingshot, "slingshot"}, {ObjectID::Crumbs, "crumbs"},
+        {ObjectID::Teleport, "teleport"},   {ObjectID::Key, "key2"},
+        {ObjectID::Ladder, "ladder"},       {ObjectID::Portal, "portal"},
+        {ObjectID::Message, "board"},       {ObjectID::Music, "backmusic"},
+        {ObjectID::Weather, "weather"},     {ObjectID::Theme, "theme"},
+        {ObjectID::Unknown, "flight"},
+    };
+    return objects.at(id);
 }
 
 /*

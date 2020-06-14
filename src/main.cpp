@@ -93,7 +93,7 @@ void writeLevelJson(const std::string& name, const CYLevel& level)
             }
             objects.push_back(jsonObj);
         }
-        json["lvl"]["obj_" + std::to_string(i)] = objects;
+        json["lvl"][objectIdToString((ObjectID)i)] = objects;
     }
 
     auto data = json.dump();
@@ -179,27 +179,21 @@ void writeLevel(const std::string& name, const CYLevel& level)
     }
 }
 
-std::optional<CYLevel> readFile(const std::string& name)
-{
-    return parseFile(name.c_str());
-}
-
 void testLocal(const std::string& name)
 {
-    benchmark::Timer<> timer;
-    std::string path = "games/" + name;
-   // std::cout << path << std::endl;
-    auto level = parseFile(path);
+    auto level = parseFile("games/" + name);
     if (level) {
-       // std::cout << "Writing level!\n";
-        //writeLevel(name, *level);
         writeLevelJson(name, *level);
     }
-    std::cout << name << ' ' << timer.getTime() << "ms" << std::endl;
 }
 
 int main()
 {
+    benchmark::Benchmark<25> bench("Time: ", &testLocal,
+                                   "158209.The Mouse Returns.Haakson.cy");
+    bench.outputTimes();
+    //testLocal("158209.The Mouse Returns.Haakson.cy");
+    return 0;
     benchmark::Timer<> timer;
     for (const auto& path : fs::directory_iterator("games/")) {
         testLocal(path.path().filename().string());
